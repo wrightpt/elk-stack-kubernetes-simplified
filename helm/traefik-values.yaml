@@ -1,0 +1,146 @@
+# helm/traefik-values.yaml
+image:
+  name: traefik
+  tag: v2.9
+
+# Use ingressRoute instead of the deprecated ingress
+ingressRoute:
+  dashboard:
+    enabled: true
+
+# Configuration
+additionalArguments:
+  - "--providers.file.filename=/etc/traefik/config.yml"
+  - "--providers.file.watch=true"
+  - "--log.level=DEBUG"
+  - "--certificatesresolvers.letsencrypt.acme.email=connect@3xmr.com"
+  - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+  - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory"
+  - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
+  - "--certificatesresolvers.letsencrypt.acme.dnschallenge.delaybeforecheck=30"
+  - "--serverstransport.insecureskipverify=true"
+
+# Define entry points
+ports:
+  web:
+    redirectTo: websecure
+    port: 80
+    expose: true
+    exposedPort: 80
+  websecure:
+    port: 443
+    expose: true
+    exposedPort: 443
+    tls:
+      enabled: true
+  traefik:
+    port: 8080
+    expose: true
+    exposedPort: 8080
+
+# Persistent volumes for certificates
+persistence:
+  enabled: true
+  name: letsencrypt
+  accessMode: ReadWriteOnce
+  size: 128Mi
+  storageClass: "local-storage"
+  path: /letsencrypt
+
+# Mount configuration file
+deployment:
+  additionalVolumes:
+    - name: traefik-config
+      configMap:
+        name: traefik-config
+  additionalVolumeMounts:
+    - name: traefik-config
+      mountPath: /etc/traefik/config.yml
+      subPath: config.yml
+
+# Additional configuration
+additionalResources:
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: traefik-config
+    data:
+      config.yml: |
+        http:
+          routers:
+            rpc:
+              rule: "Host(`rpc.1xmr.com`)"
+              entryPoints:
+                - websecure
+              service: rpc
+              tls:
+                certResolver: letsencrypt
+            wallet:
+              rule: "Host(`wallet.1xmr.com`)"
+              entryPoints:
+                - websecure
+              service: wallet
+              tls:
+                certResolver: letsencrypt
+            kibana:
+              rule: "Host(`kibana.1xmr.com`)"
+              entryPoints:
+                - websecure
+              service: kibana
+              tls:
+                certResolver: letsencrypt
+            elasticsearch:
+              rule: "Host(`elasticsearch.1xmr.com`)"
+              entryPoints:
+                - websecure
+              service: elasticsearch
+              tls:
+                certResolver: letsencrypt
+              middlewares:
+                - es-auth
+            logstash:
+              rule: "Host(`logstash.1xmr.com`)"
+              entryPoints:
+                - websecure
+              service: logstash
+              tls:
+                certResolver: letsencrypt
+          services:
+            rpc:
+              loadBalancer:
+                servers:
+                  - url: "http://rpc-service:18082"
+                passHostHeader: true
+            wallet:
+              loadBalancer:
+                servers:
+                  - url: "http://wallet-service:18081"
+                passHostHeader: true
+            kibana:
+              loadBalancer:
+                servers:
+                  - url: "http://kibana:5601"
+                passHostHeader: true
+            elasticsearch:
+              loadBalancer:
+                servers:
+                  - url: "http://elasticsearch-master:9200"
+                passHostHeader: true
+            logstash:
+              loadBalancer:
+                servers:
+                  - url: "http://logstash:5044"
+                passHostHeader: true
+          middlewares:
+            es-auth:
+              headers:
+                customRequestHeaders:
+                  Authorization: "Basic ${ES_AUTH_HEADER}"
+
+# Environment variables for secrets
+env:
+  - name: ES_AUTH_HEADER
+    valueFrom:
+      secretKeyRef:
+        name: es-auth-header
+        key: value

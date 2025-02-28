@@ -1,0 +1,25 @@
+.
+├── argocd
+│   ├── applications
+│   │   ├── elasticsearch.yaml
+│   │   ├── kibana.yaml
+│   │   ├── logstash.yaml
+│   │   └── traefik.yaml
+│   └── setup
+│       └── argocd-installation.yaml
+├── docker
+│   ├── elasticsearch
+│   │   └── Dockerfile
+│   ├── kibana
+│   │   └── Dockerfile
+│   ├── logstash
+│   │   └── Dockerfile
+│   └── traefik
+│       └── Dockerfile
+└── helm
+    ├── elasticsearch-values.yaml
+    ├── kibana-values.yaml
+    ├── logstash-values.yaml
+    └── traefik-values.yaml
+
+10 directories, 13 files

@@ -1,0 +1,67 @@
+# helm/kibana-values.yaml
+image:
+  repository: "kibana"
+  tag: "7.17.3"
+
+elasticsearchHosts: "http://elasticsearch-master:9200"
+
+# Resource requests and limits
+resources:
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+  limits:
+    cpu: "1"
+    memory: "2Gi"
+
+# Persistence configuration
+persistence:
+  enabled: true
+  storageClass: "local-storage"
+  size: "5Gi"
+
+# Network settings
+service:
+  type: ClusterIP
+  port: 5601
+
+# Security settings
+securityContext:
+  enabled: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+# Kibana configuration
+kibanaConfig:
+  kibana.yml: |
+    server.host: "0.0.0.0"
+    server.publicBaseUrl: "https://kibana.1xmr.com"
+    elasticsearch.username: "kibana_admin"
+    elasticsearch.password: "${KIBANA_ES_PASSWORD}"
+    elasticsearch.ssl.verificationMode: none
+    xpack.encryptedSavedObjects.encryptionKey: "${KIBANA_ENCRYPTION_KEY}"
+    logging:
+      appenders:
+        file:
+          type: file
+          fileName: /var/log/kibana/kibana.log
+          layout:
+            type: json
+      root:
+        appenders:
+          - default
+          - file
+    pid.file: /run/kibana/kibana.pid
+
+# Environment variables for secrets
+extraEnvs:
+  - name: KIBANA_ES_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: kibana-credentials
+        key: password
+  - name: KIBANA_ENCRYPTION_KEY
+    valueFrom:
+      secretKeyRef:
+        name: kibana-credentials
+        key: encryptionKey

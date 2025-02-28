@@ -1,0 +1,35 @@
+# helm/elasticsearch-values.yaml
+replicas: 1  # Adjust based on your home server capacity
+
+# Resource requests and limits
+resources:
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+  limits:
+    cpu: "1"
+    memory: "2Gi"
+
+# Persistence configuration
+persistence:
+  enabled: true
+  storageClass: "local-storage"
+  size: "30Gi"
+
+# Network settings
+service:
+  type: ClusterIP
+
+# Security settings
+securityContext:
+  enabled: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+# Config for ES
+esConfig:
+  elasticsearch.yml: |
+    cluster.name: home-cluster
+    discovery.type: single-node
+    xpack.security.enabled: true
+    xpack.security.transport.ssl.enabled: true

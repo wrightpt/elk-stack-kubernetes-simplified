@@ -1,0 +1,124 @@
+.
+├── argocd
+│   ├── applications
+│   │   ├── elasticsearch.yaml
+│   │   ├── kibana.yaml
+│   │   ├── logstash.yaml
+│   │   └── traefik.yaml
+│   └── setup
+│       └── argocd-installation.yaml
+├── compiled_code.txt
+├── docker
+│   ├── elasticsearch
+│   │   └── Dockerfile
+│   ├── kibana
+│   │   └── Dockerfile
+│   ├── logstash
+│   │   └── Dockerfile
+│   └── traefik
+│       └── Dockerfile
+├── helm
+│   ├── elasticsearch-values.yaml
+│   ├── kibana-values.yaml
+│   ├── logstash-values.yaml
+│   └── traefik-values.yaml
+└── utput
+
+10 directories, 15 files
+File: argocd/applications/elasticsearch.yaml
+Lines: 0
+-----BEGIN argocd/applications/elasticsearch.yaml-----
+
+-----END argocd/applications/elasticsearch.yaml-----
+
+File: argocd/applications/kibana.yaml
+Lines: 0
+-----BEGIN argocd/applications/kibana.yaml-----
+
+-----END argocd/applications/kibana.yaml-----
+
+File: argocd/applications/logstash.yaml
+Lines: 0
+-----BEGIN argocd/applications/logstash.yaml-----
+
+-----END argocd/applications/logstash.yaml-----
+
+File: argocd/applications/traefik.yaml
+Lines: 0
+-----BEGIN argocd/applications/traefik.yaml-----
+
+-----END argocd/applications/traefik.yaml-----
+
+File: argocd/setup/argocd-installation.yaml
+Lines: 8
+-----BEGIN argocd/setup/argocd-installation.yaml-----
+# argocd/setup/argocd-installation.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd
+---
+# This includes the core ArgoCD installation
+# When applying, use: kubectl apply -f argocd-installation.yaml -n argocd
+
+-----END argocd/setup/argocd-installation.yaml-----
+
+File: helm/elasticsearch-values.yaml
+Lines: 35
+-----BEGIN helm/elasticsearch-values.yaml-----
+# helm/elasticsearch-values.yaml
+replicas: 1  # Adjust based on your home server capacity
+
+# Resource requests and limits
+resources:
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+  limits:
+    cpu: "1"
+    memory: "2Gi"
+
+# Persistence configuration
+persistence:
+  enabled: true
+  storageClass: "local-storage"
+  size: "30Gi"
+
+# Network settings
+service:
+  type: ClusterIP
+
+# Security settings
+securityContext:
+  enabled: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+# Config for ES
+esConfig:
+  elasticsearch.yml: |
+    cluster.name: home-cluster
+    discovery.type: single-node
+    xpack.security.enabled: true
+    xpack.security.transport.ssl.enabled: true
+
+-----END helm/elasticsearch-values.yaml-----
+
+File: helm/kibana-values.yaml
+Lines: 0
+-----BEGIN helm/kibana-values.yaml-----
+
+-----END helm/kibana-values.yaml-----
+
+File: helm/logstash-values.yaml
+Lines: 0
+-----BEGIN helm/logstash-values.yaml-----
+
+-----END helm/logstash-values.yaml-----
+
+File: helm/traefik-values.yaml
+Lines: 0
+-----BEGIN helm/traefik-values.yaml-----
+
+-----END helm/traefik-values.yaml-----
+

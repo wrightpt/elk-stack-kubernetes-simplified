@@ -1,0 +1,8 @@
+# argocd/setup/argocd-installation.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd
+---
+# This includes the core ArgoCD installation
+# When applying, use: kubectl apply -f argocd-installation.yaml -n argocd
