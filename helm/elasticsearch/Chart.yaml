@@ -1,0 +1,10 @@
+apiVersion: v2
+name: elasticsearch
+description: Elasticsearch Helm chart for Kubernetes
+type: application
+version: 1.0.0
+appVersion: 7.17.3
+dependencies:
+  - name: elasticsearch
+    version: 7.17.3
+    repository: https://helm.elastic.co

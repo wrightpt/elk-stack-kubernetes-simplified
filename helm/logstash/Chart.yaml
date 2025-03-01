@@ -1,0 +1,10 @@
+apiVersion: v2
+name: logstash
+description: Logstash Helm chart for Kubernetes
+type: application
+version: 1.0.0
+appVersion: 7.17.3
+dependencies:
+  - name: logstash
+    version: 7.17.3
+    repository: https://helm.elastic.co
