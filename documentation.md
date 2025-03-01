@@ -7,7 +7,6 @@
 │   │   └── traefik.yaml
 │   └── setup
 │       └── argocd-installation.yaml
-├── compiled_code.txt
 ├── docker
 │   ├── elasticsearch
 │   │   └── Dockerfile
@@ -18,14 +17,26 @@
 │   └── traefik
 │       └── Dockerfile
 ├── documentation.md
+├── elasticsearch-git.yaml
 ├── helm
-│   ├── elasticsearch-values.yaml
-│   ├── kibana-values.yaml
-│   ├── logstash-values.yaml
-│   └── traefik-values.yaml
+│   ├── elasticsearch
+│   │   ├── Chart.yaml
+│   │   └── values.yaml
+│   ├── kibana
+│   │   ├── Chart.yaml
+│   │   └── values.yaml
+│   ├── logstash
+│   │   ├── Chart.yaml
+│   │   └── values.yaml
+│   └── traefik
+│       ├── Chart.yaml
+│       └── values.yaml
+├── kibana-git.yaml
+├── logstash-git.yaml
+├── traefik-git.yaml
 └── utput
 
-10 directories, 16 files
+14 directories, 23 files
 File: argocd/applications/elasticsearch.yaml
 Lines: 23
 -----BEGIN argocd/applications/elasticsearch.yaml-----
@@ -156,9 +167,54 @@ metadata:
 
 -----END argocd/setup/argocd-installation.yaml-----
 
-File: helm/elasticsearch-values.yaml
+File: elasticsearch-git.yaml
+Lines: 23
+-----BEGIN elasticsearch-git.yaml-----
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: elasticsearch
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:wrightpt/elk-stack-kubernetes-simplified.git
+    targetRevision: main
+    path: helm
+    helm:
+      valueFiles:
+        - elasticsearch-values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: elk
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+-----END elasticsearch-git.yaml-----
+
+File: helm/elasticsearch/Chart.yaml
+Lines: 10
+-----BEGIN helm/elasticsearch/Chart.yaml-----
+apiVersion: v2
+name: elasticsearch
+description: Elasticsearch Helm chart for Kubernetes
+type: application
+version: 1.0.0
+appVersion: 7.17.3
+dependencies:
+  - name: elasticsearch
+    version: 7.17.3
+    repository: https://helm.elastic.co
+
+-----END helm/elasticsearch/Chart.yaml-----
+
+File: helm/elasticsearch/values.yaml
 Lines: 35
------BEGIN helm/elasticsearch-values.yaml-----
+-----BEGIN helm/elasticsearch/values.yaml-----
 # helm/elasticsearch-values.yaml
 replicas: 1  # Adjust based on your home server capacity
 
@@ -195,11 +251,27 @@ esConfig:
     xpack.security.enabled: true
     xpack.security.transport.ssl.enabled: true
 
------END helm/elasticsearch-values.yaml-----
+-----END helm/elasticsearch/values.yaml-----
 
-File: helm/kibana-values.yaml
+File: helm/kibana/Chart.yaml
+Lines: 10
+-----BEGIN helm/kibana/Chart.yaml-----
+apiVersion: v2
+name: kibana
+description: Kibana Helm chart for Kubernetes
+type: application
+version: 1.0.0
+appVersion: 7.17.3
+dependencies:
+  - name: kibana
+    version: 7.17.3
+    repository: https://helm.elastic.co
+
+-----END helm/kibana/Chart.yaml-----
+
+File: helm/kibana/values.yaml
 Lines: 67
------BEGIN helm/kibana-values.yaml-----
+-----BEGIN helm/kibana/values.yaml-----
 # helm/kibana-values.yaml
 image:
   repository: "kibana"
@@ -268,11 +340,27 @@ extraEnvs:
         name: kibana-credentials
         key: encryptionKey
 
------END helm/kibana-values.yaml-----
+-----END helm/kibana/values.yaml-----
 
-File: helm/logstash-values.yaml
+File: helm/logstash/Chart.yaml
+Lines: 10
+-----BEGIN helm/logstash/Chart.yaml-----
+apiVersion: v2
+name: logstash
+description: Logstash Helm chart for Kubernetes
+type: application
+version: 1.0.0
+appVersion: 7.17.3
+dependencies:
+  - name: logstash
+    version: 7.17.3
+    repository: https://helm.elastic.co
+
+-----END helm/logstash/Chart.yaml-----
+
+File: helm/logstash/values.yaml
 Lines: 119
------BEGIN helm/logstash-values.yaml-----
+-----BEGIN helm/logstash/values.yaml-----
 # helm/logstash-values.yaml
 image:
   repository: "logstash"
@@ -393,11 +481,27 @@ extraEnvs:
   - name: ENVIRONMENT
     value: "production"
 
------END helm/logstash-values.yaml-----
+-----END helm/logstash/values.yaml-----
 
-File: helm/traefik-values.yaml
+File: helm/traefik/Chart.yaml
+Lines: 10
+-----BEGIN helm/traefik/Chart.yaml-----
+apiVersion: v2
+name: traefik
+description: Traefik Helm chart for Kubernetes
+type: application
+version: 1.0.0
+appVersion: 10.24.0
+dependencies:
+  - name: traefik
+    version: 10.24.0
+    repository: https://helm.traefik.io/traefik
+
+-----END helm/traefik/Chart.yaml-----
+
+File: helm/traefik/values.yaml
 Lines: 146
------BEGIN helm/traefik-values.yaml-----
+-----BEGIN helm/traefik/values.yaml-----
 # helm/traefik-values.yaml
 image:
   name: traefik
@@ -545,5 +649,92 @@ env:
         name: es-auth-header
         key: value
 
------END helm/traefik-values.yaml-----
+-----END helm/traefik/values.yaml-----
+
+File: kibana-git.yaml
+Lines: 23
+-----BEGIN kibana-git.yaml-----
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kibana
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:wrightpt/elk-stack-kubernetes-simplified.git
+    targetRevision: main
+    path: helm
+    helm:
+      valueFiles:
+        - kibana-values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: elk
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+-----END kibana-git.yaml-----
+
+File: logstash-git.yaml
+Lines: 23
+-----BEGIN logstash-git.yaml-----
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: logstash
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:wrightpt/elk-stack-kubernetes-simplified.git
+    targetRevision: main
+    path: helm
+    helm:
+      valueFiles:
+        - logstash-values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: elk
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+-----END logstash-git.yaml-----
+
+File: traefik-git.yaml
+Lines: 23
+-----BEGIN traefik-git.yaml-----
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:wrightpt/elk-stack-kubernetes-simplified.git
+    targetRevision: main
+    path: helm
+    helm:
+      valueFiles:
+        - traefik-values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: traefik
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+-----END traefik-git.yaml-----
 

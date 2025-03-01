@@ -144,3 +144,9 @@ env:
       secretKeyRef:
         name: es-auth-header
         key: value
+
+
+# Add to elasticsearch values.yaml
+security:
+  enabled: true
+  passwordSecret: elastic-credentials
