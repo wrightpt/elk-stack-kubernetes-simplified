@@ -1,4 +1,4 @@
-# helm/traefik-values.yaml
+# helm/traefik/values.yaml
 image:
   name: traefik
   tag: v2.9
@@ -14,15 +14,11 @@ additionalArguments:
   - "--providers.file.watch=true"
   - "--log.level=DEBUG"
   - "--certificatesresolvers.letsencrypt.acme.email=connect@3xmr.com"
-  - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+  - "--certificatesresolvers.letsencrypt.acme.storage=/data/acme.json"
   - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory"
   - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
   - "--certificatesresolvers.letsencrypt.acme.dnschallenge.delaybeforecheck=30"
   - "--serverstransport.insecureskipverify=true"
-  # Added new arguments
-  - "--certificatesresolvers.letsencrypt.acme.email=your-email@example.com"
-  - "--certificatesresolvers.letsencrypt.acme.storage=/data/acme.json"
-  - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
 
 # Define entry points
 ports:
@@ -49,7 +45,7 @@ persistence:
   accessMode: ReadWriteOnce
   size: 128Mi
   storageClass: "local-storage"
-  path: /letsencrypt
+  path: /data
 
 # Mount configuration file
 deployment:
@@ -148,3 +144,8 @@ env:
       secretKeyRef:
         name: es-auth-header
         key: value
+  - name: CF_API_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: cloudflare-api-token
+        key: CF_API_TOKEN
