@@ -19,6 +19,10 @@ additionalArguments:
   - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
   - "--certificatesresolvers.letsencrypt.acme.dnschallenge.delaybeforecheck=30"
   - "--serverstransport.insecureskipverify=true"
+  # Added new arguments
+  - "--certificatesresolvers.letsencrypt.acme.email=your-email@example.com"
+  - "--certificatesresolvers.letsencrypt.acme.storage=/data/acme.json"
+  - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
 
 # Define entry points
 ports:
@@ -144,9 +148,3 @@ env:
       secretKeyRef:
         name: es-auth-header
         key: value
-
-
-# Add to elasticsearch values.yaml
-security:
-  enabled: true
-  passwordSecret: elastic-credentials

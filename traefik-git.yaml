@@ -8,10 +8,10 @@ spec:
   source:
     repoURL: git@github.com:wrightpt/elk-stack-kubernetes-simplified.git
     targetRevision: main
-    path: helm
+    path: helm/traefik  # Updated to point to the correct subdirectory
     helm:
       valueFiles:
-        - traefik-values.yaml
+        - values.yaml  # Updated to match the actual filename in the directory
   destination:
     server: https://kubernetes.default.svc
     namespace: traefik
