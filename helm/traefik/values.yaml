@@ -1,158 +1,51 @@
-# helm/traefik/values.yaml
-image:
-  name: traefik
-  tag: v2.9
+# Define the service configuration for Traefik
+service:
+  type: LoadBalancer
+  # Specify the external IP to match your current setup (optional, depending on your cluster)
+  externalIPs:
+    - 192.168.1.240
+  ports:
+    # HTTP port configuration
+    web:
+      port: 80
+      protocol: TCP
+      # Node port is optional; Kubernetes manages it automatically for LoadBalancer services
+      # Uncomment if you need to enforce the exact node port from your current setup
+      # nodePort: 31421
+    # HTTPS port configuration
+    websecure:
+      port: 443
+      protocol: TCP
+      # Uncomment if you need to enforce the exact node port
+      # nodePort: 30887
 
-# Use ingressRoute instead of the deprecated ingress
+# Enable the Traefik dashboard for monitoring (optional but recommended)
+dashboard:
+  enabled: true
+  # Optionally set a domain for the dashboard if you’ll access it externally via Ingress
+  # Replace with your actual domain if applicable
+  # domain: traefik-dashboard.yourdomain.com
+
+# Configure an IngressRoute for the dashboard (optional)
 ingressRoute:
   dashboard:
     enabled: true
+    # Define the rule for accessing the dashboard
+    # Replace 'traefik.yourdomain.com' with your domain or a local hostname
+    rule: "Host(`traefik.local`) && PathPrefix(`/dashboard`)"
 
-# Configuration
-additionalArguments:
-  - "--providers.file.filename=/etc/traefik/config.yml"
-  - "--providers.file.watch=true"
-  - "--log.level=DEBUG"
-  - "--certificatesresolvers.letsencrypt.acme.email=connect@3xmr.com"
-  - "--certificatesresolvers.letsencrypt.acme.storage=/data/acme.json"
-  - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory"
-  - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
-  - "--certificatesresolvers.letsencrypt.acme.dnschallenge.delaybeforecheck=30"
-  - "--serverstransport.insecureskipverify=true"
+# Enable Kubernetes providers to allow Traefik to discover services and ingresses
+providers:
+  kubernetesCRD:
+    enabled: true
+  kubernetesIngress:
+    enabled: true
 
-# Service configuration
-service:
-  type: NodePort
+# Optional: Add annotations if your cluster requires them for the LoadBalancer
+# annotations:
+#   metallb.universe.tf/address-pool: "default"  # Example for MetalLB, adjust as needed
 
-# Define entry points with nodePorts
-ports:
-  web:
-    redirectTo: websecure
-    port: 80
-    expose: true
-    exposedPort: 80
-    nodePort: 30080
-  websecure:
-    port: 443
-    expose: true
-    exposedPort: 443
-    nodePort: 30443
-    tls:
-      enabled: true
-  traefik:
-    port: 8080
-    expose: true
-    exposedPort: 8080
-    # nodePort: 30081  # Uncomment and set if you want to expose the dashboard externally
-
-# Persistent volumes for certificates
-persistence:
-  enabled: true
-  name: letsencrypt
-  accessMode: ReadWriteOnce
-  size: 128Mi
-  storageClass: "local-storage"
-  path: /data
-
-# Mount configuration file
-deployment:
-  additionalVolumes:
-    - name: traefik-config
-      configMap:
-        name: traefik-config
-  additionalVolumeMounts:
-    - name: traefik-config
-      mountPath: /etc/traefik/config.yml
-      subPath: config.yml
-
-# Additional configuration
-additionalResources:
-  - apiVersion: v1
-    kind: ConfigMap
-    metadata:
-      name: traefik-config
-    data:
-      config.yml: |
-        http:
-          routers:
-            rpc:
-              rule: "Host(`rpc.1xmr.com`)"
-              entryPoints:
-                - websecure
-              service: rpc
-              tls:
-                certResolver: letsencrypt
-            wallet:
-              rule: "Host(`wallet.1xmr.com`)"
-              entryPoints:
-                - websecure
-              service: wallet
-              tls:
-                certResolver: letsencrypt
-            kibana:
-              rule: "Host(`kibana.1xmr.com`)"
-              entryPoints:
-                - websecure
-              service: kibana
-              tls:
-                certResolver: letsencrypt
-            elasticsearch:
-              rule: "Host(`elasticsearch.1xmr.com`)"
-              entryPoints:
-                - websecure
-              service: elasticsearch
-              tls:
-                certResolver: letsencrypt
-              middlewares:
-                - es-auth
-            logstash:
-              rule: "Host(`logstash.1xmr.com`)"
-              entryPoints:
-                - websecure
-              service: logstash
-              tls:
-                certResolver: letsencrypt
-          services:
-            rpc:
-              loadBalancer:
-                servers:
-                  - url: "http://rpc-service:18082"
-                passHostHeader: true
-            wallet:
-              loadBalancer:
-                servers:
-                  - url: "http://wallet-service:18081"
-                passHostHeader: true
-            kibana:
-              loadBalancer:
-                servers:
-                  - url: "http://kibana:5601"
-                passHostHeader: true
-            elasticsearch:
-              loadBalancer:
-                servers:
-                  - url: "http://elasticsearch-master:9200"
-                passHostHeader: true
-            logstash:
-              loadBalancer:
-                servers:
-                  - url: "http://logstash:5044"
-                passHostHeader: true
-          middlewares:
-            es-auth:
-              headers:
-                customRequestHeaders:
-                  Authorization: "Basic ${ES_AUTH_HEADER}"
-
-# Environment variables for secrets
-env:
-  - name: ES_AUTH_HEADER
-    valueFrom:
-      secretKeyRef:
-        name: es-auth-header
-        key: value
-  - name: CF_API_TOKEN
-    valueFrom:
-      secretKeyRef:
-        name: cloudflare-api-token
-        key: CF_API_TOKEN
+# Optional: Configure additional Traefik settings
+# logs:
+#   general:
+#     level: DEBUG  # Useful for troubleshooting
