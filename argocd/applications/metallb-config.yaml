@@ -1,0 +1,23 @@
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: home-lan-pool
+  namespace: metallb-system
+spec:
+  addresses:
+    - 192.168.1.240-192.168.1.250
+  # Set autoAssign to 'true' if you want MetalLB to automatically assign IPs 
+  # from this pool to LoadBalancer Services.
+  autoAssign: true
+
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: home-lan-advert
+  namespace: metallb-system
+spec:
+  # Name of the IPAddressPool to advertise on L2
+  ipAddressPools:
+    - home-lan-pool
+

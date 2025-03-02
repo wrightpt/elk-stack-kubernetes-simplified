@@ -11,7 +11,7 @@ spec:
     targetRevision: 7.17.3
     helm:
       valueFiles:
-        - ../../helm/elasticsearch-values.yaml
+        - ../../helm/elasticsearch/values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: elk

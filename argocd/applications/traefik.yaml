@@ -1,3 +1,4 @@
+#/elk-stack-repo/argocd/applications/traefik.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -11,7 +12,7 @@ spec:
     targetRevision: 10.24.0
     helm:
       valueFiles:
-        - ../../helm/traefik-values.yaml
+        - ../../helm/traefik/values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: traefik
