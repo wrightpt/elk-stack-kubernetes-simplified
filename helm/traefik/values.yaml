@@ -20,23 +20,30 @@ additionalArguments:
   - "--certificatesresolvers.letsencrypt.acme.dnschallenge.delaybeforecheck=30"
   - "--serverstransport.insecureskipverify=true"
 
-# Define entry points
+# Service configuration
+service:
+  type: NodePort
+
+# Define entry points with nodePorts
 ports:
   web:
     redirectTo: websecure
     port: 80
     expose: true
     exposedPort: 80
+    nodePort: 30080
   websecure:
     port: 443
     expose: true
     exposedPort: 443
+    nodePort: 30443
     tls:
       enabled: true
   traefik:
     port: 8080
     expose: true
     exposedPort: 8080
+    # nodePort: 30081  # Uncomment and set if you want to expose the dashboard externally
 
 # Persistent volumes for certificates
 persistence:

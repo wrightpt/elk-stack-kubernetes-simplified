@@ -1,0 +1,1246 @@
+Directory Structure:
+elk-stack-repo/
+│   ├── elasticsearch-git.yaml
+│   ├── elk-ingress-routes.yaml
+│   ├── traefik-deployment.yaml
+│   ├── kibana-git.yaml
+│   ├── traefik-full-deployment.yaml
+│   ├── logstash-git.yaml
+│   ├── traefik-git.yaml
+argocd/
+│   ├── setup/
+│   ├── │   ├── argocd-installation.yaml
+│   ├── applications/
+│   ├── │   ├── logstash.yaml
+│   ├── │   ├── metallb.yaml
+│   ├── │   ├── elasticsearch.yaml
+│   ├── │   ├── kibana.yaml
+│   ├── │   ├── traefik.yaml
+│   ├── │   ├── metallb-config.yaml
+.git/
+│   ├── logs/
+│   │   ├── refs/
+│   │   │   ├── heads/
+│   │   │   ├── remotes/
+│   │   │   │   ├── origin/
+│   ├── hooks/
+│   ├── info/
+│   ├── objects/
+│   │   ├── 3c/
+│   │   ├── 32/
+│   │   ├── pack/
+│   │   ├── b3/
+│   │   ├── fe/
+│   │   ├── 88/
+│   │   ├── 79/
+│   │   ├── 8d/
+│   │   ├── 05/
+│   │   ├── 0e/
+│   │   ├── 8c/
+│   │   ├── ef/
+│   │   ├── 97/
+│   │   ├── 3b/
+│   │   ├── f8/
+│   │   ├── 42/
+│   │   ├── 6c/
+│   │   ├── 39/
+│   │   ├── 84/
+│   │   ├── 81/
+│   │   ├── 58/
+│   │   ├── 91/
+│   │   ├── 60/
+│   │   ├── 34/
+│   │   ├── f9/
+│   │   ├── ac/
+│   │   ├── b9/
+│   │   ├── 0c/
+│   │   ├── 3a/
+│   │   ├── e6/
+│   │   ├── 94/
+│   │   ├── 16/
+│   │   ├── 51/
+│   │   ├── 5e/
+│   │   ├── 92/
+│   │   ├── e4/
+│   │   ├── a3/
+│   │   ├── 01/
+│   │   ├── fd/
+│   │   ├── 07/
+│   │   ├── 41/
+│   │   ├── c4/
+│   │   ├── ed/
+│   │   ├── 3d/
+│   │   ├── 35/
+│   │   ├── 4b/
+│   │   ├── a2/
+│   │   ├── 02/
+│   │   ├── 8e/
+│   │   ├── e0/
+│   │   ├── 9e/
+│   │   ├── bb/
+│   │   ├── e3/
+│   │   ├── 4a/
+│   │   ├── d0/
+│   │   ├── be/
+│   │   ├── 80/
+│   │   ├── f7/
+│   │   ├── 37/
+│   │   ├── ec/
+│   │   ├── e8/
+│   │   ├── 71/
+│   │   ├── info/
+│   │   ├── ad/
+│   │   ├── 46/
+│   │   ├── 1c/
+│   │   ├── 86/
+│   │   ├── 1e/
+│   │   ├── 31/
+│   │   ├── 5b/
+│   │   ├── c9/
+│   │   ├── 7f/
+│   │   ├── f0/
+│   │   ├── c0/
+│   │   ├── 99/
+│   │   ├── 54/
+│   │   ├── 63/
+│   │   ├── eb/
+│   │   ├── 76/
+│   │   ├── 56/
+│   │   ├── 06/
+│   │   ├── 9d/
+│   │   ├── c2/
+│   │   ├── ce/
+│   │   ├── 0b/
+│   │   ├── b6/
+│   │   ├── 74/
+│   │   ├── 3e/
+│   ├── branches/
+│   ├── refs/
+│   │   ├── heads/
+│   │   ├── tags/
+│   │   ├── remotes/
+│   │   │   ├── origin/
+docker/
+│   ├── elasticsearch/
+│   ├── │   ├── Dockerfile
+│   ├── traefik/
+│   ├── │   ├── Dockerfile
+│   ├── logstash/
+│   ├── │   ├── Dockerfile
+│   ├── kibana/
+│   ├── │   ├── Dockerfile
+helm/
+│   ├── elasticsearch/
+│   ├── │   ├── values.yaml
+│   ├── │   ├── Chart.yaml
+│   ├── traefik/
+│   ├── │   ├── values.yaml
+│   ├── │   ├── Chart.yaml
+│   ├── logstash/
+│   ├── │   ├── values.yaml
+│   ├── │   ├── Chart.yaml
+│   ├── kibana/
+│   ├── │   ├── values.yaml
+│   ├── │   ├── Chart.yaml
+
+=== File: elasticsearch-git.yaml ===
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: elasticsearch
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:wrightpt/elk-stack-kubernetes-simplified.git
+    targetRevision: main
+    path: helm
+    helm:
+      valueFiles:
+        - elasticsearch-values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: elk
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+
+=== File: elk-ingress-routes.yaml ===
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: elasticsearch-route
+  namespace: traefik
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`elasticsearch.1xmr.com`)
+      kind: Rule
+      services:
+        - name: elasticsearch-master
+          namespace: elk
+          port: 9200
+  tls:
+    certResolver: letsencrypt
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: kibana-route
+  namespace: traefik
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`kibana.1xmr.com`)
+      kind: Rule
+      services:
+        - name: kibana
+          namespace: elk
+          port: 5601
+  tls:
+    certResolver: letsencrypt
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: logstash-route
+  namespace: traefik
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`logstash.1xmr.com`)
+      kind: Rule
+      services:
+        - name: logstash
+          namespace: elk
+          port: 5044
+  tls:
+    certResolver: letsencrypt
+
+
+=== File: traefik-deployment.yaml ===
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{},"labels":{"app.kubernetes.io/instance":"traefik","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"traefik","helm.sh/chart":"traefik-10.24.0"},"name":"traefik","namespace":"traefik"},"spec":{"minReadySeconds":0,"replicas":1,"selector":{"matchLabels":{"app.kubernetes.io/instance":"traefik","app.kubernetes.io/name":"traefik"}},"strategy":{"rollingUpdate":{"maxSurge":1,"maxUnavailable":1},"type":"RollingUpdate"},"template":{"metadata":{"annotations":{"prometheus.io/path":"/metrics","prometheus.io/port":"9100","prometheus.io/scrape":"true"},"labels":{"app.kubernetes.io/instance":"traefik","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"traefik","helm.sh/chart":"traefik-10.24.0"}},"spec":{"containers":[{"args":["--global.checknewversion","--global.sendanonymoususage","--entrypoints.metrics.address=:9100/tcp","--entrypoints.traefik.address=:9000/tcp","--entrypoints.web.address=:8000/tcp","--entrypoints.websecure.address=:8443/tcp","--api.dashboard=true","--ping=true","--metrics.prometheus=true","--metrics.prometheus.entrypoint=metrics","--providers.kubernetescrd","--providers.kubernetesingress"],"image":"traefik:2.8.0","imagePullPolicy":"IfNotPresent","livenessProbe":{"failureThreshold":3,"httpGet":{"path":"/ping","port":9000},"initialDelaySeconds":10,"periodSeconds":10,"successThreshold":1,"timeoutSeconds":2},"name":"traefik","ports":[{"containerPort":9100,"name":"metrics","protocol":"TCP"},{"containerPort":9000,"name":"traefik","protocol":"TCP"},{"containerPort":8000,"name":"web","protocol":"TCP"},{"containerPort":8443,"name":"websecure","protocol":"TCP"}],"readinessProbe":{"failureThreshold":1,"httpGet":{"path":"/ping","port":9000},"initialDelaySeconds":10,"periodSeconds":10,"successThreshold":1,"timeoutSeconds":2},"resources":null,"securityContext":{"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":65532,"runAsNonRoot":true,"runAsUser":65532},"volumeMounts":[{"mountPath":"/data","name":"data"},{"mountPath":"/tmp","name":"tmp"}]}],"hostNetwork":false,"securityContext":{"fsGroup":65532},"serviceAccountName":"traefik","terminationGracePeriodSeconds":60,"volumes":[{"emptyDir":{},"name":"data"},{"emptyDir":{},"name":"tmp"}]}}}}
+  creationTimestamp: "2025-03-01T20:33:08Z"
+  generation: 1
+  labels:
+    app.kubernetes.io/instance: traefik
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: traefik
+    helm.sh/chart: traefik-10.24.0
+  name: traefik
+  namespace: traefik
+  resourceVersion: "103480"
+  uid: 964682bf-f16e-47ff-be99-6c74d930bc2a
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: traefik
+      app.kubernetes.io/name: traefik
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9100"
+        prometheus.io/scrape: "true"
+      creationTimestamp: null
+      labels:
+        app.kubernetes.io/instance: traefik
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: traefik
+        helm.sh/chart: traefik-10.24.0
+    spec:
+      containers:
+      - args:
+        - --global.checknewversion
+        - --global.sendanonymoususage
+        - --entrypoints.metrics.address=:9100/tcp
+        - --entrypoints.traefik.address=:9000/tcp
+        - --entrypoints.web.address=:8000/tcp
+        - --entrypoints.websecure.address=:8443/tcp
+        - --api.dashboard=true
+        - --log.level=DEBUG
+        - --ping=true
+        - --metrics.prometheus=true
+        - --metrics.prometheus.entrypoint=metrics
+        - --providers.kubernetescrd
+        - --providers.kubernetesingress
+        image: traefik:2.8.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /ping
+            port: 9000
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 2
+        name: traefik
+        ports:
+        - containerPort: 9100
+          name: metrics
+          protocol: TCP
+        - containerPort: 9000
+          name: traefik
+          protocol: TCP
+        - containerPort: 8000
+          name: web
+          protocol: TCP
+        - containerPort: 8443
+          name: websecure
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 1
+          httpGet:
+            path: /ping
+            port: 9000
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 2
+        resources: {}
+        securityContext:
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 65532
+          runAsNonRoot: true
+          runAsUser: 65532
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /data
+          name: data
+        - mountPath: /tmp
+          name: tmp
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        fsGroup: 65532
+      serviceAccount: traefik
+      serviceAccountName: traefik
+      terminationGracePeriodSeconds: 60
+      volumes:
+      - emptyDir: {}
+        name: data
+      - emptyDir: {}
+        name: tmp
+status:
+  availableReplicas: 1
+  conditions:
+  - lastTransitionTime: "2025-03-01T20:33:08Z"
+    lastUpdateTime: "2025-03-01T20:33:08Z"
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  - lastTransitionTime: "2025-03-01T20:33:08Z"
+    lastUpdateTime: "2025-03-01T20:33:28Z"
+    message: ReplicaSet "traefik-6755589d5b" has successfully progressed.
+    reason: NewReplicaSetAvailable
+    status: "True"
+    type: Progressing
+  observedGeneration: 1
+  readyReplicas: 1
+  replicas: 1
+  updatedReplicas: 1
+
+
+=== File: kibana-git.yaml ===
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kibana
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:wrightpt/elk-stack-kubernetes-simplified.git
+    targetRevision: main
+    path: helm
+    helm:
+      valueFiles:
+        - kibana-values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: elk
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+
+=== File: traefik-full-deployment.yaml ===
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "3"
+  labels:
+    app.kubernetes.io/instance: traefik
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: traefik
+    helm.sh/chart: traefik-10.24.0
+  name: traefik
+  namespace: traefik
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: traefik
+      app.kubernetes.io/name: traefik
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9100"
+        prometheus.io/scrape: "true"
+      labels:
+        app.kubernetes.io/instance: traefik
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: traefik
+        helm.sh/chart: traefik-10.24.0
+    spec:
+      containers:
+      - args:
+        - --global.checknewversion
+        - --global.sendanonymoususage
+        - --entrypoints.metrics.address=:9100/tcp
+        - --entrypoints.traefik.address=:9000/tcp
+        - --entrypoints.web.address=:8000/tcp
+        - --entrypoints.websecure.address=:8443/tcp
+        - --api.dashboard=true
+        - --ping=true
+        - --metrics.prometheus=true
+        - --metrics.prometheus.entrypoint=metrics
+        - --providers.kubernetescrd
+        - --providers.kubernetesingress
+        image: traefik:2.8.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /ping
+            port: 9000
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 2
+        name: traefik
+        ports:
+        - containerPort: 9100
+          name: metrics
+          protocol: TCP
+        - containerPort: 9000
+          name: traefik
+          protocol: TCP
+        - containerPort: 8000
+          name: web
+          protocol: TCP
+        - containerPort: 8443
+          name: websecure
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 1
+          httpGet:
+            path: /ping
+            port: 9000
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 2
+        resources: {}
+        securityContext:
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 65532
+          runAsNonRoot: true
+          runAsUser: 65532
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /data
+          name: data
+        - mountPath: /tmp
+          name: tmp
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        fsGroup: 65532
+      serviceAccount: traefik
+      serviceAccountName: traefik
+      terminationGracePeriodSeconds: 60
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: traefik-certs
+      - emptyDir: {}
+        name: tmp
+
+
+=== File: logstash-git.yaml ===
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: logstash
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:wrightpt/elk-stack-kubernetes-simplified.git
+    targetRevision: main
+    path: helm
+    helm:
+      valueFiles:
+        - logstash-values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: elk
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+
+=== File: traefik-git.yaml ===
+#/elk-stack-repo/traefik-git.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:wrightpt/elk-stack-kubernetes-simplified.git
+    targetRevision: main
+    path: helm/traefik  # Updated to point to the correct subdirectory
+    helm:
+      valueFiles:
+        - values.yaml  # Updated to match the actual filename in the directory
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: traefik
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+
+=== File: argocd/setup/argocd-installation.yaml ===
+# argocd/setup/argocd-installation.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd
+---
+# This includes the core ArgoCD installation
+# When applying, use: kubectl apply -f argocd-installation.yaml -n argocd
+
+
+=== File: argocd/applications/logstash.yaml ===
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: logstash
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://helm.elastic.co
+    chart: logstash
+    targetRevision: 7.17.3
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: elk
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+
+=== File: argocd/applications/metallb.yaml ===
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: metallb
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'git@github.com:wrightpt/elk-stack-kubernetes-simplified.git'
+    targetRevision: main
+    path: argocd/applications   # Adjust as needed
+    directory:
+      recurse: true             # If needed for scanning nested files
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: metallb-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+
+
+=== File: argocd/applications/elasticsearch.yaml ===
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: elasticsearch
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://helm.elastic.co
+    chart: elasticsearch
+    targetRevision: 7.17.3
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: elk
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+
+=== File: argocd/applications/kibana.yaml ===
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kibana
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://helm.elastic.co
+    chart: kibana
+    targetRevision: 7.17.3
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: elk
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+
+=== File: argocd/applications/traefik.yaml ===
+#/elk-stack-repo/argocd/applications/traefik.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://helm.traefik.io/traefik
+    chart: traefik
+    targetRevision: 10.24.0
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: traefik
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+
+=== File: argocd/applications/metallb-config.yaml ===
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: home-lan-pool
+  namespace: metallb-system
+spec:
+  addresses:
+    - 192.168.1.240-192.168.1.250
+  # Set autoAssign to 'true' if you want MetalLB to automatically assign IPs 
+  # from this pool to LoadBalancer Services.
+  autoAssign: true
+
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: home-lan-advert
+  namespace: metallb-system
+spec:
+  # Name of the IPAddressPool to advertise on L2
+  ipAddressPools:
+    - home-lan-pool
+
+
+
+=== File: docker/elasticsearch/Dockerfile ===
+FROM docker.elastic.co/elasticsearch/elasticsearch:7.17.3
+
+# Copy custom configuration files
+COPY elasticsearch.yml /usr/share/elasticsearch/config/
+COPY jvm.options /usr/share/elasticsearch/config/
+
+# Set permissions
+USER root
+RUN chmod 660 /usr/share/elasticsearch/config/elasticsearch.yml \
+    && chmod 660 /usr/share/elasticsearch/config/jvm.options \
+    && chown -R 1000:0 /usr/share/elasticsearch/config
+
+# Switch back to elasticsearch user
+USER 1000
+
+
+=== File: docker/traefik/Dockerfile ===
+FROM traefik:v2.9
+
+# Copy Traefik configuration
+COPY traefik.yml /etc/traefik/
+COPY config.yml /etc/traefik/
+
+# REDACTED: Sensitive content removed
+RUN mkdir -p /letsencrypt
+
+
+=== File: docker/logstash/Dockerfile ===
+FROM docker.elastic.co/logstash/logstash:7.17.3
+
+# Copy configuration files
+COPY logstash.yml /usr/share/logstash/config/
+COPY pipelines.yml /usr/share/logstash/config/
+COPY jvm.options /usr/share/logstash/config/
+COPY conf.d/ /usr/share/logstash/pipeline/
+
+# Set permissions
+USER root
+RUN chmod 660 /usr/share/logstash/config/logstash.yml \
+    && chmod 660 /usr/share/logstash/config/pipelines.yml \
+    && chmod 660 /usr/share/logstash/config/jvm.options \
+    && chmod -R 660 /usr/share/logstash/pipeline/ \
+    && chown -R 1000:0 /usr/share/logstash/config \
+    && chown -R 1000:0 /usr/share/logstash/pipeline
+
+# Switch back to logstash user
+USER 1000
+
+
+=== File: docker/kibana/Dockerfile ===
+FROM docker.elastic.co/kibana/kibana:7.17.3
+
+# Copy custom configuration
+COPY kibana.yml /usr/share/kibana/config/
+
+# Set permissions
+USER root
+RUN chmod 660 /usr/share/kibana/config/kibana.yml \
+    && chown -R 1000:0 /usr/share/kibana/config
+
+# Switch back to kibana user
+USER 1000
+
+
+=== File: helm/elasticsearch/values.yaml ===
+# helm/elasticsearch-values.yaml
+replicas: 1  # Adjust based on your home server capacity
+
+# Resource requests and limits
+resources:
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+  limits:
+    cpu: "1"
+    memory: "2Gi"
+
+# Persistence configuration
+persistence:
+  enabled: true
+  storageClass: "local-storage"
+  size: "30Gi"
+
+# Network settings
+service:
+  type: ClusterIP
+
+# Security settings
+securityContext:
+  enabled: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+# Config for ES
+esConfig:
+  elasticsearch.yml: |
+    cluster.name: home-cluster
+    discovery.type: single-node
+    xpack.security.enabled: true
+    xpack.security.transport.ssl.enabled: true
+
+
+=== File: helm/elasticsearch/Chart.yaml ===
+apiVersion: v2
+name: elasticsearch
+description: Elasticsearch Helm chart for Kubernetes
+type: application
+version: 1.0.0
+appVersion: 7.17.3
+dependencies:
+  - name: elasticsearch
+    version: 7.17.3
+    repository: https://helm.elastic.co
+
+
+=== File: helm/traefik/values.yaml ===
+# helm/traefik/values.yaml
+image:
+  name: traefik
+  tag: v2.9
+
+# Use ingressRoute instead of the deprecated ingress
+ingressRoute:
+  dashboard:
+    enabled: true
+
+# Configuration
+additionalArguments:
+  - "--providers.file.filename=/etc/traefik/config.yml"
+  - "--providers.file.watch=true"
+  - "--log.level=DEBUG"
+# REDACTED: Sensitive content removed
+# REDACTED: Sensitive content removed
+# REDACTED: Sensitive content removed
+# REDACTED: Sensitive content removed
+# REDACTED: Sensitive content removed
+  - "--serverstransport.insecureskipverify=true"
+
+# Define entry points
+ports:
+  web:
+    redirectTo: websecure
+    port: 80
+    expose: true
+    exposedPort: 80
+  websecure:
+    port: 443
+    expose: true
+    exposedPort: 443
+    tls:
+      enabled: true
+  traefik:
+    port: 8080
+    expose: true
+    exposedPort: 8080
+
+# REDACTED: Sensitive content removed
+persistence:
+  enabled: true
+  name: letsencrypt
+  accessMode: ReadWriteOnce
+  size: 128Mi
+  storageClass: "local-storage"
+  path: /data
+
+# Mount configuration file
+deployment:
+  additionalVolumes:
+    - name: traefik-config
+      configMap:
+        name: traefik-config
+  additionalVolumeMounts:
+    - name: traefik-config
+      mountPath: /etc/traefik/config.yml
+      subPath: config.yml
+
+# Additional configuration
+additionalResources:
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: traefik-config
+    data:
+      config.yml: |
+        http:
+          routers:
+            rpc:
+              rule: "Host(`rpc.1xmr.com`)"
+              entryPoints:
+                - websecure
+              service: rpc
+              tls:
+                certResolver: letsencrypt
+            wallet:
+              rule: "Host(`wallet.1xmr.com`)"
+              entryPoints:
+                - websecure
+              service: wallet
+              tls:
+                certResolver: letsencrypt
+            kibana:
+              rule: "Host(`kibana.1xmr.com`)"
+              entryPoints:
+                - websecure
+              service: kibana
+              tls:
+                certResolver: letsencrypt
+            elasticsearch:
+              rule: "Host(`elasticsearch.1xmr.com`)"
+              entryPoints:
+                - websecure
+              service: elasticsearch
+              tls:
+                certResolver: letsencrypt
+              middlewares:
+                - es-auth
+            logstash:
+              rule: "Host(`logstash.1xmr.com`)"
+              entryPoints:
+                - websecure
+              service: logstash
+              tls:
+                certResolver: letsencrypt
+          services:
+            rpc:
+              loadBalancer:
+                servers:
+                  - url: "http://rpc-service:18082"
+                passHostHeader: true
+            wallet:
+              loadBalancer:
+                servers:
+                  - url: "http://wallet-service:18081"
+                passHostHeader: true
+            kibana:
+              loadBalancer:
+                servers:
+                  - url: "http://kibana:5601"
+                passHostHeader: true
+            elasticsearch:
+              loadBalancer:
+                servers:
+                  - url: "http://elasticsearch-master:9200"
+                passHostHeader: true
+            logstash:
+              loadBalancer:
+                servers:
+                  - url: "http://logstash:5044"
+                passHostHeader: true
+          middlewares:
+            es-auth:
+              headers:
+                customRequestHeaders:
+                  Authorization: "Basic ${ES_AUTH_HEADER}"
+
+# REDACTED: Sensitive content removed
+env:
+  - name: ES_AUTH_HEADER
+    valueFrom:
+# REDACTED: Sensitive content removed
+        name: es-auth-header
+# REDACTED: Sensitive content removed
+  - name: CF_API_TOKEN
+    valueFrom:
+# REDACTED: Sensitive content removed
+        name: cloudflare-api-token
+# REDACTED: Sensitive content removed
+
+
+=== File: helm/traefik/Chart.yaml ===
+apiVersion: v2
+name: traefik
+description: Traefik Helm chart for Kubernetes
+type: application
+version: 1.0.0
+appVersion: 10.24.0
+dependencies:
+  - name: traefik
+    version: 10.24.0
+    repository: https://helm.traefik.io/traefik
+
+
+=== File: helm/logstash/values.yaml ===
+# helm/logstash-values.yaml
+image:
+  repository: "logstash"
+  tag: "7.17.3"
+
+# Resource requests and limits
+resources:
+  requests:
+    cpu: "500m"
+    memory: "2Gi"
+  limits:
+    cpu: "2"
+    memory: "4Gi"
+
+# Persistence configuration
+persistence:
+  enabled: true
+  storageClass: "local-storage"
+  size: "10Gi"
+
+# Network settings
+service:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 5044
+      protocol: TCP
+
+# Security settings
+securityContext:
+  runAsUser: 1000
+  fsGroup: 1000
+
+# Logstash configuration
+logstashConfig:
+  logstash.yml: |
+    path.data: /usr/share/logstash/data
+    path.logs: /var/log/logstash
+    node.name: nextjs-market-logstash
+    pipeline.workers: 8
+    pipeline.batch.size: 1000
+    pipeline.batch.delay: 50
+    queue.type: persisted
+    queue.max_bytes: 3gb
+    log.level: debug
+
+  pipelines.yml: |
+    - pipeline.id: main
+      path.config: "/usr/share/logstash/pipeline/*.conf"
+
+# JVM options
+logstashJavaOpts: "-Xms2g -Xmx2g"
+
+# Pipeline configuration
+logstashPipeline:
+  nextjs-market.conf: |
+    input {
+      http {
+        host => "0.0.0.0"
+        port => 5044
+        codec => json
+        
+        response_headers => {
+          "Content-Type" => "application/json"
+          "Access-Control-Allow-Origin" => "*"
+          "Access-Control-Allow-Methods" => "POST, OPTIONS"
+          "Access-Control-Allow-Headers" => "Content-Type"
+        }
+      }
+    }
+
+    filter {
+      mutate {
+        add_field => {
+          "received_at" => "%{@timestamp}"
+          "environment" => "${ENVIRONMENT}"
+          "service" => "nextjs-market"
+          "log_type" => "application"
+        }
+# REDACTED: Sensitive content removed
+      }
+    }
+
+    output {
+      elasticsearch {
+        hosts => ["${ES_HOSTS}"]
+        user => "${ES_USER}"
+# REDACTED: Sensitive content removed
+        index => "nextjs-market-${ENVIRONMENT}-%{+YYYY.MM.dd}"
+        ssl_verification_mode => "none"
+        timeout => 120
+        retry_on_conflict => 5
+        retry_max_interval => 30
+        retry_initial_interval => 2
+      }
+      
+      file {
+        path => "/var/log/logstash/nextjs-market-debug.log"
+        codec => json_lines
+        flush_interval => 60
+      }
+    }
+
+# Environment variables
+extraEnvs:
+  - name: ES_HOSTS
+    value: "https://elasticsearch-master:9200"
+  - name: ES_USER
+    valueFrom:
+# REDACTED: Sensitive content removed
+        name: logstash-credentials
+# REDACTED: Sensitive content removed
+# REDACTED: Sensitive content removed
+    valueFrom:
+# REDACTED: Sensitive content removed
+        name: logstash-credentials
+# REDACTED: Sensitive content removed
+  - name: ENVIRONMENT
+    value: "production"
+
+
+=== File: helm/logstash/Chart.yaml ===
+apiVersion: v2
+name: logstash
+description: Logstash Helm chart for Kubernetes
+type: application
+version: 1.0.0
+appVersion: 7.17.3
+dependencies:
+  - name: logstash
+    version: 7.17.3
+    repository: https://helm.elastic.co
+
+
+=== File: helm/kibana/values.yaml ===
+# helm/kibana-values.yaml
+image:
+  repository: "kibana"
+  tag: "7.17.3"
+
+elasticsearchHosts: "http://elasticsearch-master:9200"
+
+# Resource requests and limits
+resources:
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+  limits:
+    cpu: "1"
+    memory: "2Gi"
+
+# Persistence configuration
+persistence:
+  enabled: true
+  storageClass: "local-storage"
+  size: "5Gi"
+
+# Network settings
+service:
+  type: ClusterIP
+  port: 5601
+
+# Security settings
+securityContext:
+  enabled: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+# Kibana configuration
+kibanaConfig:
+  kibana.yml: |
+    server.host: "0.0.0.0"
+    server.publicBaseUrl: "https://kibana.1xmr.com"
+    elasticsearch.username: "kibana_admin"
+# REDACTED: Sensitive content removed
+    elasticsearch.ssl.verificationMode: none
+# REDACTED: Sensitive content removed
+    logging:
+      appenders:
+        file:
+          type: file
+          fileName: /var/log/kibana/kibana.log
+          layout:
+            type: json
+      root:
+        appenders:
+          - default
+          - file
+    pid.file: /run/kibana/kibana.pid
+
+# REDACTED: Sensitive content removed
+extraEnvs:
+# REDACTED: Sensitive content removed
+    valueFrom:
+# REDACTED: Sensitive content removed
+        name: kibana-credentials
+# REDACTED: Sensitive content removed
+# REDACTED: Sensitive content removed
+    valueFrom:
+# REDACTED: Sensitive content removed
+        name: kibana-credentials
+# REDACTED: Sensitive content removed
+
+
+=== File: helm/kibana/Chart.yaml ===
+apiVersion: v2
+name: kibana
+description: Kibana Helm chart for Kubernetes
+type: application
+version: 1.0.0
+appVersion: 7.17.3
+dependencies:
+  - name: kibana
+    version: 7.17.3
+    repository: https://helm.elastic.co
+
+
+=== File: .github/workflows/build-images.yml ===
+
+

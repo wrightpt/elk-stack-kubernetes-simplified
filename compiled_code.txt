@@ -20,6 +20,7 @@
 │   └── traefik
 │       └── Dockerfile
 ├── elasticsearch-git.yaml
+├── elk-ingress-routes.yaml
 ├── helm
 │   ├── elasticsearch
 │   │   ├── Chart.yaml
@@ -37,8 +38,7 @@
 ├── logstash-git.yaml
 ├── traefik-deployment.yaml
 ├── traefik-full-deployment.yaml
-├── traefik-git.yaml
-└── utput
+└── traefik-git.yaml
 
 14 directories, 27 files
 File: argocd/applications/elasticsearch.yaml
@@ -57,7 +57,7 @@ spec:
     targetRevision: 7.17.3
     helm:
       valueFiles:
-        - ../../helm/elasticsearch-values.yaml
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: elk
@@ -86,7 +86,7 @@ spec:
     targetRevision: 7.17.3
     helm:
       valueFiles:
-        - ../../helm/kibana-values.yaml
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: elk
@@ -115,7 +115,7 @@ spec:
     targetRevision: 7.17.3
     helm:
       valueFiles:
-        - ../../helm/logstash-values.yaml
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: elk
@@ -203,7 +203,7 @@ spec:
     targetRevision: 10.24.0
     helm:
       valueFiles:
-        - ../../helm/traefik-values.yaml
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: traefik
@@ -258,6 +258,67 @@ spec:
       - CreateNamespace=true
 
 -----END elasticsearch-git.yaml-----
+
+File: elk-ingress-routes.yaml
+Lines: 55
+-----BEGIN elk-ingress-routes.yaml-----
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: elasticsearch-route
+  namespace: traefik
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`elasticsearch.1xmr.com`)
+      kind: Rule
+      services:
+        - name: elasticsearch-master
+          namespace: elk
+          port: 9200
+  tls:
+    certResolver: letsencrypt
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: kibana-route
+  namespace: traefik
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`kibana.1xmr.com`)
+      kind: Rule
+      services:
+        - name: kibana
+          namespace: elk
+          port: 5601
+  tls:
+    certResolver: letsencrypt
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: logstash-route
+  namespace: traefik
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`logstash.1xmr.com`)
+      kind: Rule
+      services:
+        - name: logstash
+          namespace: elk
+          port: 5044
+  tls:
+    certResolver: letsencrypt
+
+-----END elk-ingress-routes.yaml-----
 
 File: helm/elasticsearch/Chart.yaml
 Lines: 10
