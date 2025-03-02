@@ -1,0 +1,55 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: elasticsearch-route
+  namespace: traefik
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`elasticsearch.1xmr.com`)
+      kind: Rule
+      services:
+        - name: elasticsearch-master
+          namespace: elk
+          port: 9200
+  tls:
+    certResolver: letsencrypt
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: kibana-route
+  namespace: traefik
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`kibana.1xmr.com`)
+      kind: Rule
+      services:
+        - name: kibana
+          namespace: elk
+          port: 5601
+  tls:
+    certResolver: letsencrypt
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: logstash-route
+  namespace: traefik
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`logstash.1xmr.com`)
+      kind: Rule
+      services:
+        - name: logstash
+          namespace: elk
+          port: 5044
+  tls:
+    certResolver: letsencrypt
