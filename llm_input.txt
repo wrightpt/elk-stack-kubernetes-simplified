@@ -33,6 +33,7 @@ argocd/
 │   │   ├── pack/
 │   │   ├── b3/
 │   │   ├── ca/
+│   │   ├── db/
 │   │   ├── fe/
 │   │   ├── 88/
 │   │   ├── 79/
@@ -88,6 +89,7 @@ argocd/
 │   │   ├── 9a/
 │   │   ├── c7/
 │   │   ├── 62/
+│   │   ├── 66/
 │   │   ├── a3/
 │   │   ├── 5a/
 │   │   ├── 90/
@@ -130,6 +132,7 @@ argocd/
 │   │   ├── 87/
 │   │   ├── af/
 │   │   ├── be/
+│   │   ├── 2e/
 │   │   ├── 80/
 │   │   ├── f7/
 │   │   ├── 37/
@@ -159,6 +162,7 @@ argocd/
 │   │   ├── eb/
 │   │   ├── 76/
 │   │   ├── 56/
+│   │   ├── a0/
 │   │   ├── 06/
 │   │   ├── 9d/
 │   │   ├── 29/
@@ -514,7 +518,6 @@ spec:
 
 
 === File: argocd/applications/traefik.yaml ===
-#/elk-stack-repo/argocd/applications/traefik.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -522,22 +525,23 @@ metadata:
   namespace: argocd
 spec:
   project: default
-source:
-  repoURL: "https://helm.traefik.io/traefik"
-  chart: "traefik"
-  targetRevision: "10.24.0"
-  helm:
-    valueFiles:
-      - "helm/traefik/values.yaml"  # Your custom overrides
+  source:               # <--- This must be under spec!
+    repoURL: "https://helm.traefik.io/traefik"
+    chart: "traefik"
+    targetRevision: "10.24.0"
+    helm:
+      valueFiles:
+        - "helm/traefik/values.yaml"
   destination:
-    server: https://kubernetes.default.svc
-    namespace: traefik
+    server: "https://kubernetes.default.svc"
+    namespace: "traefik"
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+
 
 
 === File: argocd/applications/metallb-config.yaml ===
