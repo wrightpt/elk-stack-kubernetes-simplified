@@ -12,7 +12,7 @@ spec:
     targetRevision: 10.24.0
     helm:
       valueFiles:
-        - values.yaml
+        - helm/traefik/values.yaml  # Updated to correct path
   destination:
     server: https://kubernetes.default.svc
     namespace: traefik
