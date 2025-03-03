@@ -39,11 +39,12 @@ additionalArguments:
   - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
   - "--certificatesresolvers.letsencrypt.acme.dnschallenge.delaybeforecheck=30"
   - "--serverstransport.insecureskipverify=true"
+  - "--log.level=DEBUG"
 
 # Persistent volumes for certificates
 persistence:
   enabled: true
-  name: letsencrypt
+  name: traefik-certs
   accessMode: ReadWriteOnce
   size: 128Mi
   storageClass: "local-storage"
@@ -140,9 +141,9 @@ additionalResources:
                 passHostHeader: true
           middlewares:
             es-auth:
-              headers:
-                customRequestHeaders:
-                  Authorization: "Basic ${ES_AUTH_HEADER}"
+              basicAuth:
+                users:
+                  - "admin:$apr1$H6uskkkW$IgXLP6ewTrSuBkTrqE8wj/"
 
 # Logs for troubleshooting
 logs:

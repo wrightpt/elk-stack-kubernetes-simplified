@@ -26,24 +26,33 @@ argocd/
 │   ├── hooks/
 │   ├── info/
 │   ├── objects/
+│   │   ├── 7a/
+│   │   ├── ab/
 │   │   ├── 3c/
 │   │   ├── 32/
 │   │   ├── pack/
 │   │   ├── b3/
+│   │   ├── ca/
 │   │   ├── fe/
 │   │   ├── 88/
 │   │   ├── 79/
+│   │   ├── 20/
 │   │   ├── 8d/
 │   │   ├── 05/
+│   │   ├── 0a/
 │   │   ├── 0e/
+│   │   ├── 24/
 │   │   ├── 8c/
 │   │   ├── ef/
 │   │   ├── 97/
 │   │   ├── 3b/
+│   │   ├── b8/
+│   │   ├── 11/
 │   │   ├── f8/
 │   │   ├── 42/
 │   │   ├── 6c/
 │   │   ├── 39/
+│   │   ├── 38/
 │   │   ├── 84/
 │   │   ├── 81/
 │   │   ├── 58/
@@ -53,20 +62,24 @@ argocd/
 │   │   ├── f9/
 │   │   ├── ac/
 │   │   ├── b9/
+│   │   ├── 36/
 │   │   ├── 0c/
 │   │   ├── 3a/
 │   │   ├── e6/
 │   │   ├── 94/
 │   │   ├── 16/
 │   │   ├── 51/
+│   │   ├── 78/
 │   │   ├── 5e/
 │   │   ├── 92/
 │   │   ├── e4/
+│   │   ├── 09/
 │   │   ├── a3/
 │   │   ├── 01/
 │   │   ├── fd/
 │   │   ├── 07/
 │   │   ├── 41/
+│   │   ├── 27/
 │   │   ├── c4/
 │   │   ├── ed/
 │   │   ├── 3d/
@@ -76,6 +89,7 @@ argocd/
 │   │   ├── 02/
 │   │   ├── 8e/
 │   │   ├── e0/
+│   │   ├── f1/
 │   │   ├── 9e/
 │   │   ├── bb/
 │   │   ├── e3/
@@ -86,6 +100,7 @@ argocd/
 │   │   ├── f7/
 │   │   ├── 37/
 │   │   ├── ec/
+│   │   ├── 12/
 │   │   ├── e8/
 │   │   ├── 71/
 │   │   ├── info/
@@ -114,6 +129,7 @@ argocd/
 │   │   ├── b6/
 │   │   ├── 74/
 │   │   ├── 3e/
+│   │   ├── 6f/
 │   ├── branches/
 │   ├── refs/
 │   │   ├── heads/
@@ -857,45 +873,53 @@ dependencies:
 
 
 === File: helm/traefik/values.yaml ===
-# helm/traefik/values.yaml
-image:
-  name: traefik
-  tag: v2.9
+# Define the service configuration for Traefik
+service:
+  type: LoadBalancer
+  externalIPs:
+    - 192.168.1.240
+  ports:
+    web:
+      port: 80
+      protocol: TCP
+      # Node port is optional; Kubernetes manages it automatically for LoadBalancer services
+      # nodePort: 31421
+    websecure:
+      port: 443
+      protocol: TCP
+      # nodePort: 30887
 
-# Use ingressRoute instead of the deprecated ingress
+# Enable the Traefik dashboard for monitoring
+dashboard:
+  enabled: true
+  # Optionally expose the dashboard externally via the LoadBalancer or Ingress
+  # If you want it exposed, add a service port or IngressRoute
+  # For now, keep it internal and access via kubectl port-forward
+
+# Configure an IngressRoute for the dashboard (optional, if exposing externally)
 ingressRoute:
   dashboard:
     enabled: true
+    rule: "Host(`traefik.local`) && PathPrefix(`/dashboard`)"
+    # Ensure TLS is configured for the dashboard
+    tls:
+      certResolver: letsencrypt
 
-# Configuration
+# Enable Kubernetes providers to allow Traefik to discover services and ingresses
+providers:
+  kubernetesCRD:
+    enabled: true
+  kubernetesIngress:
+    enabled: true
+
+# REDACTED: Sensitive content removed
 additionalArguments:
-  - "--providers.file.filename=/etc/traefik/config.yml"
-  - "--providers.file.watch=true"
-  - "--log.level=DEBUG"
 # REDACTED: Sensitive content removed
 # REDACTED: Sensitive content removed
 # REDACTED: Sensitive content removed
 # REDACTED: Sensitive content removed
 # REDACTED: Sensitive content removed
   - "--serverstransport.insecureskipverify=true"
-
-# Define entry points
-ports:
-  web:
-    redirectTo: websecure
-    port: 80
-    expose: true
-    exposedPort: 80
-  websecure:
-    port: 443
-    expose: true
-    exposedPort: 443
-    tls:
-      enabled: true
-  traefik:
-    port: 8080
-    expose: true
-    exposedPort: 8080
 
 # REDACTED: Sensitive content removed
 persistence:
@@ -906,23 +930,21 @@ persistence:
   storageClass: "local-storage"
   path: /data
 
-# Mount configuration file
-deployment:
-  additionalVolumes:
-    - name: traefik-config
-      configMap:
-        name: traefik-config
-  additionalVolumeMounts:
-    - name: traefik-config
-      mountPath: /etc/traefik/config.yml
-      subPath: config.yml
+# REDACTED: Sensitive content removed
+env:
+  - name: CF_API_TOKEN
+    valueFrom:
+# REDACTED: Sensitive content removed
+        name: cloudflare-api-token
+# REDACTED: Sensitive content removed
 
-# Additional configuration
+# Additional configuration (e.g., config.yml for routing)
 additionalResources:
   - apiVersion: v1
     kind: ConfigMap
     metadata:
       name: traefik-config
+      namespace: traefik
     data:
       config.yml: |
         http:
@@ -964,6 +986,13 @@ additionalResources:
               service: logstash
               tls:
                 certResolver: letsencrypt
+            traefik-dashboard:
+              rule: "Host(`traefik.local`) && PathPrefix(`/dashboard`)"
+              entryPoints:
+                - websecure
+              service: api@internal
+              tls:
+                certResolver: letsencrypt
           services:
             rpc:
               loadBalancer:
@@ -996,18 +1025,10 @@ additionalResources:
                 customRequestHeaders:
                   Authorization: "Basic ${ES_AUTH_HEADER}"
 
-# REDACTED: Sensitive content removed
-env:
-  - name: ES_AUTH_HEADER
-    valueFrom:
-# REDACTED: Sensitive content removed
-        name: es-auth-header
-# REDACTED: Sensitive content removed
-  - name: CF_API_TOKEN
-    valueFrom:
-# REDACTED: Sensitive content removed
-        name: cloudflare-api-token
-# REDACTED: Sensitive content removed
+# Logs for troubleshooting
+logs:
+  general:
+    level: DEBUG
 
 
 === File: helm/traefik/Chart.yaml ===
