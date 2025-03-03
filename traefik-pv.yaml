@@ -1,20 +1,21 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Application
+apiVersion: v1
+kind: PersistentVolume
 metadata:
-  name: traefik
-  namespace: argocd
+  name: traefik-certs-pv
 spec:
-  project: default
-  source:
-    repoURL: "git@github.com:wrightpt/elk-stack-kubernetes-simplified.git"  # Your repo URL
-    targetRevision: "main"
-    path: helm/traefik
-  destination:
-    server: "https://kubernetes.default.svc"
-    namespace: "traefik"
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-    - CreateNamespace=true
+  capacity:
+    storage: 128Mi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-storage
+  local:
+    path: /mnt/kube-volumes/traefik-certs  # CORRECT PATH: /mnt/kube-volumes/traefik-certs
+  nodeAffinity:  # <-- RE-INTRODUCING nodeAffinity - IT IS REQUIRED
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - daemon  # <-- Ensure 'daemon' is the correct node name from 'kubectl get nodes' output
