@@ -2,9 +2,7 @@ Directory Structure:
 elk-stack-repo/
 │   ├── elasticsearch-git.yaml
 │   ├── elk-ingress-routes.yaml
-│   ├── traefik-deployment.yaml
 │   ├── kibana-git.yaml
-│   ├── traefik-full-deployment.yaml
 │   ├── logstash-git.yaml
 │   ├── traefik-git.yaml
 argocd/
@@ -27,6 +25,7 @@ argocd/
 │   ├── info/
 │   ├── objects/
 │   │   ├── 7a/
+│   │   ├── e1/
 │   │   ├── ab/
 │   │   ├── 3c/
 │   │   ├── 32/
@@ -40,12 +39,15 @@ argocd/
 │   │   ├── 8d/
 │   │   ├── 05/
 │   │   ├── 0a/
+│   │   ├── e2/
 │   │   ├── 0e/
 │   │   ├── 24/
+│   │   ├── 6e/
 │   │   ├── 8c/
 │   │   ├── ef/
 │   │   ├── 97/
 │   │   ├── 3b/
+│   │   ├── d7/
 │   │   ├── b8/
 │   │   ├── 11/
 │   │   ├── f8/
@@ -72,9 +74,11 @@ argocd/
 │   │   ├── 78/
 │   │   ├── 5e/
 │   │   ├── 92/
+│   │   ├── b2/
 │   │   ├── e4/
 │   │   ├── 09/
 │   │   ├── a3/
+│   │   ├── da/
 │   │   ├── 01/
 │   │   ├── fd/
 │   │   ├── 07/
@@ -89,9 +93,11 @@ argocd/
 │   │   ├── 02/
 │   │   ├── 8e/
 │   │   ├── e0/
+│   │   ├── 50/
 │   │   ├── f1/
 │   │   ├── 9e/
 │   │   ├── bb/
+│   │   ├── 2b/
 │   │   ├── e3/
 │   │   ├── 4a/
 │   │   ├── d0/
@@ -105,6 +111,7 @@ argocd/
 │   │   ├── 71/
 │   │   ├── info/
 │   │   ├── ad/
+│   │   ├── 40/
 │   │   ├── 46/
 │   │   ├── 1c/
 │   │   ├── 86/
@@ -243,152 +250,6 @@ spec:
     certResolver: letsencrypt
 
 
-=== File: traefik-deployment.yaml ===
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  annotations:
-    deployment.kubernetes.io/revision: "1"
-    kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{},"labels":{"app.kubernetes.io/instance":"traefik","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"traefik","helm.sh/chart":"traefik-10.24.0"},"name":"traefik","namespace":"traefik"},"spec":{"minReadySeconds":0,"replicas":1,"selector":{"matchLabels":{"app.kubernetes.io/instance":"traefik","app.kubernetes.io/name":"traefik"}},"strategy":{"rollingUpdate":{"maxSurge":1,"maxUnavailable":1},"type":"RollingUpdate"},"template":{"metadata":{"annotations":{"prometheus.io/path":"/metrics","prometheus.io/port":"9100","prometheus.io/scrape":"true"},"labels":{"app.kubernetes.io/instance":"traefik","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"traefik","helm.sh/chart":"traefik-10.24.0"}},"spec":{"containers":[{"args":["--global.checknewversion","--global.sendanonymoususage","--entrypoints.metrics.address=:9100/tcp","--entrypoints.traefik.address=:9000/tcp","--entrypoints.web.address=:8000/tcp","--entrypoints.websecure.address=:8443/tcp","--api.dashboard=true","--ping=true","--metrics.prometheus=true","--metrics.prometheus.entrypoint=metrics","--providers.kubernetescrd","--providers.kubernetesingress"],"image":"traefik:2.8.0","imagePullPolicy":"IfNotPresent","livenessProbe":{"failureThreshold":3,"httpGet":{"path":"/ping","port":9000},"initialDelaySeconds":10,"periodSeconds":10,"successThreshold":1,"timeoutSeconds":2},"name":"traefik","ports":[{"containerPort":9100,"name":"metrics","protocol":"TCP"},{"containerPort":9000,"name":"traefik","protocol":"TCP"},{"containerPort":8000,"name":"web","protocol":"TCP"},{"containerPort":8443,"name":"websecure","protocol":"TCP"}],"readinessProbe":{"failureThreshold":1,"httpGet":{"path":"/ping","port":9000},"initialDelaySeconds":10,"periodSeconds":10,"successThreshold":1,"timeoutSeconds":2},"resources":null,"securityContext":{"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":65532,"runAsNonRoot":true,"runAsUser":65532},"volumeMounts":[{"mountPath":"/data","name":"data"},{"mountPath":"/tmp","name":"tmp"}]}],"hostNetwork":false,"securityContext":{"fsGroup":65532},"serviceAccountName":"traefik","terminationGracePeriodSeconds":60,"volumes":[{"emptyDir":{},"name":"data"},{"emptyDir":{},"name":"tmp"}]}}}}
-  creationTimestamp: "2025-03-01T20:33:08Z"
-  generation: 1
-  labels:
-    app.kubernetes.io/instance: traefik
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: traefik
-    helm.sh/chart: traefik-10.24.0
-  name: traefik
-  namespace: traefik
-  resourceVersion: "103480"
-  uid: 964682bf-f16e-47ff-be99-6c74d930bc2a
-spec:
-  progressDeadlineSeconds: 600
-  replicas: 1
-  revisionHistoryLimit: 10
-  selector:
-    matchLabels:
-      app.kubernetes.io/instance: traefik
-      app.kubernetes.io/name: traefik
-  strategy:
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 1
-    type: RollingUpdate
-  template:
-    metadata:
-      annotations:
-        prometheus.io/path: /metrics
-        prometheus.io/port: "9100"
-        prometheus.io/scrape: "true"
-      creationTimestamp: null
-      labels:
-        app.kubernetes.io/instance: traefik
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: traefik
-        helm.sh/chart: traefik-10.24.0
-    spec:
-      containers:
-      - args:
-        - --global.checknewversion
-        - --global.sendanonymoususage
-        - --entrypoints.metrics.address=:9100/tcp
-        - --entrypoints.traefik.address=:9000/tcp
-        - --entrypoints.web.address=:8000/tcp
-        - --entrypoints.websecure.address=:8443/tcp
-        - --api.dashboard=true
-        - --log.level=DEBUG
-        - --ping=true
-        - --metrics.prometheus=true
-        - --metrics.prometheus.entrypoint=metrics
-        - --providers.kubernetescrd
-        - --providers.kubernetesingress
-        image: traefik:2.8.0
-        imagePullPolicy: IfNotPresent
-        livenessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /ping
-            port: 9000
-            scheme: HTTP
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 2
-        name: traefik
-        ports:
-        - containerPort: 9100
-          name: metrics
-          protocol: TCP
-        - containerPort: 9000
-          name: traefik
-          protocol: TCP
-        - containerPort: 8000
-          name: web
-          protocol: TCP
-        - containerPort: 8443
-          name: websecure
-          protocol: TCP
-        readinessProbe:
-          failureThreshold: 1
-          httpGet:
-            path: /ping
-            port: 9000
-            scheme: HTTP
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 2
-        resources: {}
-        securityContext:
-          capabilities:
-            drop:
-            - ALL
-          readOnlyRootFilesystem: true
-          runAsGroup: 65532
-          runAsNonRoot: true
-          runAsUser: 65532
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
-        volumeMounts:
-        - mountPath: /data
-          name: data
-        - mountPath: /tmp
-          name: tmp
-      dnsPolicy: ClusterFirst
-      restartPolicy: Always
-      schedulerName: default-scheduler
-      securityContext:
-        fsGroup: 65532
-      serviceAccount: traefik
-      serviceAccountName: traefik
-      terminationGracePeriodSeconds: 60
-      volumes:
-      - emptyDir: {}
-        name: data
-      - emptyDir: {}
-        name: tmp
-status:
-  availableReplicas: 1
-  conditions:
-  - lastTransitionTime: "2025-03-01T20:33:08Z"
-    lastUpdateTime: "2025-03-01T20:33:08Z"
-    message: Deployment has minimum availability.
-    reason: MinimumReplicasAvailable
-    status: "True"
-    type: Available
-  - lastTransitionTime: "2025-03-01T20:33:08Z"
-    lastUpdateTime: "2025-03-01T20:33:28Z"
-    message: ReplicaSet "traefik-6755589d5b" has successfully progressed.
-    reason: NewReplicaSetAvailable
-    status: "True"
-    type: Progressing
-  observedGeneration: 1
-  readyReplicas: 1
-  replicas: 1
-  updatedReplicas: 1
-
-
 === File: kibana-git.yaml ===
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -413,126 +274,6 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-
-
-=== File: traefik-full-deployment.yaml ===
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  annotations:
-    deployment.kubernetes.io/revision: "3"
-  labels:
-    app.kubernetes.io/instance: traefik
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: traefik
-    helm.sh/chart: traefik-10.24.0
-  name: traefik
-  namespace: traefik
-spec:
-  progressDeadlineSeconds: 600
-  replicas: 1
-  revisionHistoryLimit: 10
-  selector:
-    matchLabels:
-      app.kubernetes.io/instance: traefik
-      app.kubernetes.io/name: traefik
-  strategy:
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 1
-    type: RollingUpdate
-  template:
-    metadata:
-      annotations:
-        prometheus.io/path: /metrics
-        prometheus.io/port: "9100"
-        prometheus.io/scrape: "true"
-      labels:
-        app.kubernetes.io/instance: traefik
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: traefik
-        helm.sh/chart: traefik-10.24.0
-    spec:
-      containers:
-      - args:
-        - --global.checknewversion
-        - --global.sendanonymoususage
-        - --entrypoints.metrics.address=:9100/tcp
-        - --entrypoints.traefik.address=:9000/tcp
-        - --entrypoints.web.address=:8000/tcp
-        - --entrypoints.websecure.address=:8443/tcp
-        - --api.dashboard=true
-        - --ping=true
-        - --metrics.prometheus=true
-        - --metrics.prometheus.entrypoint=metrics
-        - --providers.kubernetescrd
-        - --providers.kubernetesingress
-        image: traefik:2.8.0
-        imagePullPolicy: IfNotPresent
-        livenessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /ping
-            port: 9000
-            scheme: HTTP
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 2
-        name: traefik
-        ports:
-        - containerPort: 9100
-          name: metrics
-          protocol: TCP
-        - containerPort: 9000
-          name: traefik
-          protocol: TCP
-        - containerPort: 8000
-          name: web
-          protocol: TCP
-        - containerPort: 8443
-          name: websecure
-          protocol: TCP
-        readinessProbe:
-          failureThreshold: 1
-          httpGet:
-            path: /ping
-            port: 9000
-            scheme: HTTP
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 2
-        resources: {}
-        securityContext:
-          capabilities:
-            drop:
-            - ALL
-          readOnlyRootFilesystem: true
-          runAsGroup: 65532
-          runAsNonRoot: true
-          runAsUser: 65532
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
-        volumeMounts:
-        - mountPath: /data
-          name: data
-        - mountPath: /tmp
-          name: tmp
-      dnsPolicy: ClusterFirst
-      restartPolicy: Always
-      schedulerName: default-scheduler
-      securityContext:
-        fsGroup: 65532
-      serviceAccount: traefik
-      serviceAccountName: traefik
-      terminationGracePeriodSeconds: 60
-      volumes:
-      - name: data
-        persistentVolumeClaim:
-          claimName: traefik-certs
-      - emptyDir: {}
-        name: tmp
 
 
 === File: logstash-git.yaml ===
@@ -882,26 +623,19 @@ service:
     web:
       port: 80
       protocol: TCP
-      # Node port is optional; Kubernetes manages it automatically for LoadBalancer services
-      # nodePort: 31421
     websecure:
       port: 443
       protocol: TCP
-      # nodePort: 30887
 
 # Enable the Traefik dashboard for monitoring
 dashboard:
   enabled: true
-  # Optionally expose the dashboard externally via the LoadBalancer or Ingress
-  # If you want it exposed, add a service port or IngressRoute
-  # For now, keep it internal and access via kubectl port-forward
 
-# Configure an IngressRoute for the dashboard (optional, if exposing externally)
+# Configure an IngressRoute for the dashboard
 ingressRoute:
   dashboard:
     enabled: true
     rule: "Host(`traefik.local`) && PathPrefix(`/dashboard`)"
-    # Ensure TLS is configured for the dashboard
     tls:
       certResolver: letsencrypt
 
@@ -919,12 +653,14 @@ additionalArguments:
 # REDACTED: Sensitive content removed
 # REDACTED: Sensitive content removed
 # REDACTED: Sensitive content removed
+# REDACTED: Sensitive content removed
   - "--serverstransport.insecureskipverify=true"
+  - "--log.level=DEBUG"
 
 # REDACTED: Sensitive content removed
 persistence:
   enabled: true
-  name: letsencrypt
+  name: traefik-certs
   accessMode: ReadWriteOnce
   size: 128Mi
   storageClass: "local-storage"
@@ -938,7 +674,7 @@ env:
         name: cloudflare-api-token
 # REDACTED: Sensitive content removed
 
-# Additional configuration (e.g., config.yml for routing)
+# Additional configuration for routing
 additionalResources:
   - apiVersion: v1
     kind: ConfigMap
@@ -1021,15 +757,14 @@ additionalResources:
                 passHostHeader: true
           middlewares:
             es-auth:
-              headers:
-                customRequestHeaders:
-                  Authorization: "Basic ${ES_AUTH_HEADER}"
+              basicAuth:
+                users:
+                  - "admin:$apr1$H6uskkkW$IgXLP6ewTrSuBkTrqE8wj/"
 
 # Logs for troubleshooting
 logs:
   general:
     level: DEBUG
-
 
 === File: helm/traefik/Chart.yaml ===
 apiVersion: v2

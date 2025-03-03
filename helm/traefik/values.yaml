@@ -1,3 +1,4 @@
+# elk-stack-repo/helm/traefik/values.yaml
 # Define the service configuration for Traefik
 service:
   type: LoadBalancer
