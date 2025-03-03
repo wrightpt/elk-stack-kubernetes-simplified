@@ -26,8 +26,11 @@ ingressRoute:
   dashboard:
     enabled: true
     rule: "Host(`traefik.local`) && PathPrefix(`/dashboard`)"
+    # Ensure TLS is configured for the dashboard
+    tls:
+      certResolver: letsencrypt
 
-# Enable Kubernetes providers
+# Enable Kubernetes providers to allow Traefik to discover services and ingresses
 providers:
   kubernetesCRD:
     enabled: true
