@@ -43,11 +43,16 @@ traefik:
     existingClaim: "traefik-data"  # Use the existing PVC
     path: /data
   env:
-    - name: CF_API_TOKEN
-      valueFrom:
-        secretKeyRef:
-          name: cloudflare-api-token
-          key: CF_API_TOKEN
+  - name: CLOUDFLARE_DNS_API_TOKEN
+    valueFrom:
+      secretKeyRef:
+        key: CLOUDFLARE_DNS_API_TOKEN
+        name: cloudflare-api-token
+  - name: CLOUDFLARE_ZONE_API_TOKEN
+    valueFrom:
+      secretKeyRef:
+        key: CLOUDFLARE_DNS_API_TOKEN
+        name: cloudflare-api-token
   # Rest of your configuration remains the same
 
   # Additional resources for dynamic config

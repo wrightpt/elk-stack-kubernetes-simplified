@@ -1,10 +1,12 @@
 Directory Structure:
 elk-stack-repo/
+│   ├── cloudflare-secret.yaml
 │   ├── default-traefik-values.yaml
 │   ├── elasticsearch-git.yaml
 │   ├── elk-ingress-routes.yaml
 │   ├── kibana-git.yaml
 │   ├── traefik-pv.yaml
+│   ├── traefik-storage.yaml
 │   ├── logstash-git.yaml
 │   ├── traefik-git.yaml
 argocd/
@@ -15,6 +17,7 @@ argocd/
 │   ├── │   ├── metallb.yaml
 │   ├── │   ├── elasticsearch.yaml
 │   ├── │   ├── kibana.yaml
+│   ├── │   ├── traefik.yaml
 │   ├── │   ├── metallb-config.yaml
 .git/
 │   ├── logs/
@@ -33,6 +36,7 @@ argocd/
 │   │   ├── 3c/
 │   │   ├── aa/
 │   │   ├── 32/
+│   │   ├── 8b/
 │   │   ├── pack/
 │   │   ├── b3/
 │   │   ├── 47/
@@ -45,6 +49,7 @@ argocd/
 │   │   ├── 17/
 │   │   ├── 8d/
 │   │   ├── 05/
+│   │   ├── 49/
 │   │   ├── 0a/
 │   │   ├── 22/
 │   │   ├── e2/
@@ -55,6 +60,7 @@ argocd/
 │   │   ├── 2c/
 │   │   ├── ef/
 │   │   ├── 97/
+│   │   ├── 53/
 │   │   ├── 3b/
 │   │   ├── d7/
 │   │   ├── 03/
@@ -72,6 +78,7 @@ argocd/
 │   │   ├── 84/
 │   │   ├── a7/
 │   │   ├── 81/
+│   │   ├── 75/
 │   │   ├── 96/
 │   │   ├── cd/
 │   │   ├── 58/
@@ -126,6 +133,7 @@ argocd/
 │   │   ├── e5/
 │   │   ├── 3d/
 │   │   ├── 35/
+│   │   ├── ae/
 │   │   ├── 4b/
 │   │   ├── 98/
 │   │   ├── bc/
@@ -146,13 +154,16 @@ argocd/
 │   │   ├── 2b/
 │   │   ├── e3/
 │   │   ├── 4a/
+│   │   ├── 30/
 │   │   ├── d0/
 │   │   ├── 87/
+│   │   ├── de/
 │   │   ├── af/
 │   │   ├── be/
 │   │   ├── 2e/
 │   │   ├── 80/
 │   │   ├── f7/
+│   │   ├── 19/
 │   │   ├── 37/
 │   │   ├── ec/
 │   │   ├── 12/
@@ -185,6 +196,7 @@ argocd/
 │   │   ├── 54/
 │   │   ├── e9/
 │   │   ├── 63/
+│   │   ├── 67/
 │   │   ├── eb/
 │   │   ├── 76/
 │   │   ├── 56/
@@ -233,7 +245,19 @@ helm/
 │   ├── │   ├── values.yaml
 │   ├── │   ├── Chart.yaml
 
+=== File: cloudflare-secret.yaml ===
+apiVersion: v1
+# REDACTED: Sensitive content removed
+metadata:
+  name: cloudflare-api-token
+  namespace: traefik
+type: Opaque
+stringData:
+  CF_API_TOKEN: "BLh7Yg7p3oJQ_U1k2T9zKjswLXTUgZSiud6ZYIXL"
+
+
 === File: default-traefik-values.yaml ===
+#elk-stack-repo/default-traefik-values.yaml
 # Default values for Traefik
 image:
   name: traefik
@@ -873,26 +897,68 @@ spec:
 
 
 === File: traefik-pv.yaml ===
-apiVersion: argoproj.io/v1alpha1
-kind: Application
+#elk-stack-repo/traefik-pv
+apiVersion: v1
+kind: PersistentVolume
 metadata:
-  name: traefik
-  namespace: argocd
+  name: traefik-certs-pv
 spec:
-  project: default
-  source:
-    repoURL: "git@github.com:wrightpt/elk-stack-kubernetes-simplified.git"  # Your repo URL
-    targetRevision: "main"
-    path: helm/traefik
-  destination:
-    server: "https://kubernetes.default.svc"
-    namespace: "traefik"
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-    - CreateNamespace=true
+  capacity:
+    storage: 128Mi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-storage
+  local:
+    path: /mnt/kube-volumes/traefik-certs  # CORRECT PATH: /mnt/kube-volumes/traefik-certs
+  nodeAffinity:  # <-- RE-INTRODUCING nodeAffinity - IT IS REQUIRED
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+# REDACTED: Sensitive content removed
+              operator: In
+              values:
+                - daemon  # <-- Ensure 'daemon' is the correct node name from 'kubectl get nodes' output
+
+
+=== File: traefik-storage.yaml ===
+# traefik-storage.yaml
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: traefik-pv
+spec:
+  capacity:
+    storage: 128Mi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  local:
+    path: /mnt/kube-volumes/traefik
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+# REDACTED: Sensitive content removed
+          operator: In
+          values:
+          - daemon
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: traefik-data
+  namespace: traefik
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 128Mi
+  storageClassName: local-storage
 
 
 === File: logstash-git.yaml ===
@@ -922,21 +988,18 @@ spec:
 
 
 === File: traefik-git.yaml ===
-#/elk-stack-repo/traefik-git.yaml
+#/elk-stack-repo/traefik-git
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: traefik-helm
+  name: traefik
   namespace: argocd
 spec:
   project: default
   source:
-    repoURL: "https://helm.traefik.io/traefik"
-    chart: "traefik"
-    targetRevision: "10.24.0"
-    helm:
-      valueFiles:
-      - "helm/traefik/values.yaml"
+    repoURL: "git@github.com:wrightpt/elk-stack-kubernetes-simplified.git"  # Your repo URL
+    targetRevision: "main"
+    path: helm/traefik
   destination:
     server: "https://kubernetes.default.svc"
     namespace: "traefik"
@@ -1061,6 +1124,31 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+
+
+=== File: argocd/applications/traefik.yaml ===
+# file: argocd/applications/traefik.yaml
+# file: argocd/applications/traefik.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: "git@github.com:wrightpt/elk-stack-kubernetes-simplified.git"
+    targetRevision: "main"
+    path: helm/traefik
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: "traefik"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
 
 
 === File: argocd/applications/metallb-config.yaml ===
@@ -1206,116 +1294,111 @@ dependencies:
 
 
 === File: helm/traefik/values.yaml ===
-# Service config
-service:
-  type: LoadBalancer
-  externalIPs:
-    - 192.168.1.240
-  ports:
-    web:
-      port: 80
-      protocol: TCP
-      nodePort: 30080
-    websecure:
-      port: 443
-      protocol: TCP
-      nodePort: 30443
-
-# Traefik Dashboard
-dashboard:
-  enabled: true
-
-# IngressRoute for the dashboard
-ingressRoute:
+  # Modified values.yaml for helm/traefik
+  # Service config
+traefik:
+  service:
+    type: LoadBalancer
+    externalIPs:
+      - 192.168.1.240
+    ports:
+      web:
+        port: 80
+        protocol: TCP
+        nodePort: 30080
+      websecure:
+        port: 443
+        protocol: TCP
+        nodePort: 30443
+  # Traefik Dashboard
   dashboard:
     enabled: true
-    rule: "Host(`traefik.local`) && PathPrefix(`/dashboard`)"
-    tls:
-      certResolver: letsencrypt
-
-providers:
-  kubernetesCRD:
+  # IngressRoute for the dashboard
+  ingressRoute:
+    dashboard:
+      enabled: true
+      rule: "Host(`traefik.local`) && PathPrefix(`/dashboard`)"
+      tls:
+        certResolver: letsencrypt
+  providers:
+    kubernetesCRD:
+      enabled: true
+    kubernetesIngress:
+      enabled: true
+  additionalArguments:
+# REDACTED: Sensitive content removed
+# REDACTED: Sensitive content removed
+# REDACTED: Sensitive content removed
+# REDACTED: Sensitive content removed
+# REDACTED: Sensitive content removed
+# REDACTED: Sensitive content removed
+    - "--serverstransport.insecureskipverify=true"
+    - "--log.level=DEBUG"
+  persistence:
     enabled: true
-  kubernetesIngress:
-    enabled: true
+    existingClaim: "traefik-data"  # Use the existing PVC
+    path: /data
+  env:
+    - name: CF_API_TOKEN
+      valueFrom:
+# REDACTED: Sensitive content removed
+          name: cloudflare-api-token
+# REDACTED: Sensitive content removed
+  # Rest of your configuration remains the same
 
-additionalArguments:
-# REDACTED: Sensitive content removed
-# REDACTED: Sensitive content removed
-# REDACTED: Sensitive content removed
-# REDACTED: Sensitive content removed
-# REDACTED: Sensitive content removed
-# REDACTED: Sensitive content removed
-  - "--serverstransport.insecureskipverify=true"
-  - "--log.level=DEBUG"
+  # Additional resources for dynamic config
+  additionalResources:
+    - apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: traefik-config
+        namespace: traefik
+      data:
+        config.yml: |
+          http:
+            routers:
+              kibana:
+                rule: "Host(`kibana.1xmr.com`)"
+                entryPoints:
+                  - websecure
+                service: kibana
+                tls:
+                  certResolver: letsencrypt
+              elasticsearch:
+                rule: "Host(`elasticsearch.1xmr.com`)"
+                entryPoints:
+                  - websecure
+                service: elasticsearch
+                tls:
+                  certResolver: letsencrypt
+              logstash:
+                rule: "Host(`logstash.1xmr.com`)"
+                entryPoints:
+                  - websecure
+                service: logstash
+                tls:
+                  certResolver: letsencrypt
 
-persistence:
-  enabled: true
-  name: traefik
-  accessMode: ReadWriteOnce
-  size: 128Mi
-  storageClass: "local-storage"
-  path: /data
-
-env:
-  - name: CF_API_TOKEN
-    valueFrom:
-# REDACTED: Sensitive content removed
-        name: cloudflare-api-token
-# REDACTED: Sensitive content removed
-
-# Additional resources for dynamic config
-additionalResources:
-  - apiVersion: v1
-    kind: ConfigMap
-    metadata:
-      name: traefik-config
-      namespace: traefik
-    data:
-      config.yml: |
-        http:
-          routers:
-            kibana:
-              rule: "Host(`kibana.1xmr.com`)"
-              entryPoints:
-                - websecure
-              service: kibana
-              tls:
-                certResolver: letsencrypt
-            elasticsearch:
-              rule: "Host(`elasticsearch.1xmr.com`)"
-              entryPoints:
-                - websecure
-              service: elasticsearch
-              tls:
-                certResolver: letsencrypt
-            logstash:
-              rule: "Host(`logstash.1xmr.com`)"
-              entryPoints:
-                - websecure
-              service: logstash
-              tls:
-                certResolver: letsencrypt
-
-          services:
-            kibana:
-              loadBalancer:
-                servers:
-                  - url: "http://kibana-kibana.elk:5601"
-              passHostHeader: true
-            elasticsearch:
-              loadBalancer:
-                servers:
-                  - url: "http://elasticsearch-master.elk:9200"
-              passHostHeader: true
-            logstash:
-              loadBalancer:
-                servers:
-                  - url: "http://logstash.elk:5044"
-              passHostHeader: true
+            services:
+              kibana:
+                loadBalancer:
+                  servers:
+                    - url: "http://kibana-kibana.elk:5601"
+                passHostHeader: true
+              elasticsearch:
+                loadBalancer:
+                  servers:
+                    - url: "http://elasticsearch-master.elk:9200"
+                passHostHeader: true
+              logstash:
+                loadBalancer:
+                  servers:
+                    - url: "http://logstash.elk:5044"
+                passHostHeader: true
 
 
 === File: helm/traefik/Chart.yaml ===
+#/elk-stack-repo/helm/traefik/Chart.yaml
 apiVersion: v2
 name: traefik
 description: Traefik Helm chart for Kubernetes
