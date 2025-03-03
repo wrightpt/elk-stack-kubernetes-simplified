@@ -11,8 +11,7 @@ spec:
     chart: "traefik"
     targetRevision: "10.24.0"
     helm:
-      # Instead of specifying a valueFiles: [ "values.yaml" ],
-      # we inline your entire values.yaml here under "values: |"
+      # We inline the contents of your old "helm/traefik/values.yaml" here:
       values: |
         #####################################################################
         #  Start of your local "helm/traefik/values.yaml" content (verbatim) #
@@ -133,6 +132,7 @@ spec:
                       service: api@internal
                       tls:
                         certResolver: letsencrypt
+
                   services:
                     rpc:
                       loadBalancer:
@@ -159,6 +159,7 @@ spec:
                         servers:
                           - url: "http://logstash:5044"
                       passHostHeader: true
+
                   middlewares:
                     es-auth:
                       basicAuth:
