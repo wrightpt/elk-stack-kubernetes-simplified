@@ -81,11 +81,11 @@ spec:
 
         # Cloudflare API token in environment
         env:
-          - name: CF_API_TOKEN
+          - name: CLOUDFLARE_DNS_API_TOKEN
             valueFrom:
               secretKeyRef:
                 name: cloudflare-api-token
-                key: CF_API_TOKEN
+                key: CLOUDFLARE_DNS_API_TOKEN
 
         # Additional resources: example config map for dynamic config
         additionalResources:
