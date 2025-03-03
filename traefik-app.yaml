@@ -140,7 +140,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    repoURL: git@github.com:wrightpt/elk-stack-kubernetes-simplified.git
+    repoURL: https://helm.traefik.io/traefik
     targetRevision: main
     path: helm/traefik
     helm:
