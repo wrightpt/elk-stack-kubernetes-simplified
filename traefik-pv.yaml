@@ -10,12 +10,12 @@ spec:
     - ReadWriteOnce
   storageClassName: local-storage
   local:
-    path: /mnt/kube-volumes/traefik-certs  # <-- ENSURE THIS IS /mnt/kube-volumes/traefik-certs
-  nodeAffinity:
+    path: /mnt/kube-volumes/traefik-certs  # CORRECT PATH: /mnt/kube-volumes/traefik-certs
+  nodeAffinity:  # <-- RE-INTRODUCING nodeAffinity - IT IS REQUIRED
     required:
       nodeSelectorTerms:
         - matchExpressions:
             - key: kubernetes.io/hostname
               operator: In
               values:
-                - daemon
+                - daemon  # <-- Ensure 'daemon' is the correct node name from 'kubectl get nodes' output

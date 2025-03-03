@@ -31,6 +31,7 @@ argocd/
 │   │   ├── ab/
 │   │   ├── 25/
 │   │   ├── 3c/
+│   │   ├── aa/
 │   │   ├── 32/
 │   │   ├── pack/
 │   │   ├── b3/
@@ -876,7 +877,7 @@ spec:
     - ReadWriteOnce
   storageClassName: local-storage
   local:
-    path: /mnt/kube-volumes/traefik-certs
+    path: /mnt/kube-volumes/traefik-certs  # <-- ENSURE THIS IS /mnt/kube-volumes/traefik-certs
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -885,7 +886,6 @@ spec:
               operator: In
               values:
                 - daemon
-
 
 
 === File: logstash-git.yaml ===
