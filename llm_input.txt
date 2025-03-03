@@ -122,6 +122,7 @@ argocd/
 │   │   ├── bb/
 │   │   ├── c8/
 │   │   ├── ba/
+│   │   ├── 08/
 │   │   ├── 2b/
 │   │   ├── e3/
 │   │   ├── 4a/
@@ -371,7 +372,6 @@ spec:
 
 
 === File: traefik-git.yaml ===
-#/elk-stack-repo/traefik-git.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -379,22 +379,23 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  source:
-    repoURL: git@github.com:wrightpt/elk-stack-kubernetes-simplified.git
-    targetRevision: main
-    path: helm/traefik  # Updated to point to the correct subdirectory
+  source:                      # <--- Must be indented under spec
+    repoURL: "https://helm.traefik.io/traefik"
+    chart: "traefik"
+    targetRevision: "10.24.0"
     helm:
       valueFiles:
-        - values.yaml  # Updated to match the actual filename in the directory
+      - "helm/traefik/values.yaml"
   destination:
-    server: https://kubernetes.default.svc
-    namespace: traefik
+    server: "https://kubernetes.default.svc"
+    namespace: "traefik"
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
+    - CreateNamespace=true
+
 
 
 === File: argocd/setup/argocd-installation.yaml ===
