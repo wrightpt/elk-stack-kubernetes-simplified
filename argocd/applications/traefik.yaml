@@ -6,13 +6,13 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  source:
-    repoURL: git@github.com:wrightpt/elk-stack-kubernetes-simplified.git
-    chart: traefik
-    targetRevision: 10.24.0
-    helm:
-      valueFiles:
-        - helm/traefik/values.yaml  # Updated to correct path
+source:
+  repoURL: "https://helm.traefik.io/traefik"
+  chart: "traefik"
+  targetRevision: "10.24.0"
+  helm:
+    valueFiles:
+      - "helm/traefik/values.yaml"  # Your custom overrides
   destination:
     server: https://kubernetes.default.svc
     namespace: traefik
