@@ -64,6 +64,8 @@ spec:
           - "--certificatesresolvers.letsencrypt.acme.dnschallenge.delaybeforecheck=30"
           - "--serverstransport.insecureskipverify=true"
           - "--log.level=DEBUG"
+          - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"  # Use staging first to avoid rate limits
+
 
         # Create/use ONE PVC named "traefik-certs" for ACME certs
         persistence:
