@@ -1,3 +1,4 @@
+#/elk-stack-repo/traefik-git
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

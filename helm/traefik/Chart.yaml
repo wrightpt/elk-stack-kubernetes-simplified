@@ -1,3 +1,4 @@
+#/elk-stack-repo/helm/traefik/Chart.yaml
 apiVersion: v2
 name: traefik
 description: Traefik Helm chart for Kubernetes
