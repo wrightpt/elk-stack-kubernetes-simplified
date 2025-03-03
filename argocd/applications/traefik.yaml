@@ -5,10 +5,10 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  source:
-    repoURL: https://helm.traefik.io/traefik
-    chart: traefik
-    targetRevision: 10.24.0
+  source:               # <--- This must be under spec!
+    repoURL: "https://helm.traefik.io/traefik"
+    chart: "traefik"
+    targetRevision: "10.24.0"
     helm:
       valueFiles:
         - "helm/traefik/values.yaml"
