@@ -29,9 +29,11 @@ spec:
             web:
               port: 80
               protocol: TCP
+              nodePort: 30080  # Fixed port
             websecure:
               port: 443
               protocol: TCP
+              nodePort: 30443  # Fixed port
 
         # Traefik Dashboard
         dashboard:
