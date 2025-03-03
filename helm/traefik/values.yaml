@@ -1,4 +1,4 @@
-#elk-stack-repo/helm/traefik/values.yaml
+# Modified values.yaml for helm/traefik
 # Service config
 service:
   type: LoadBalancer
@@ -13,11 +13,9 @@ service:
       port: 443
       protocol: TCP
       nodePort: 30443
-
 # Traefik Dashboard
 dashboard:
   enabled: true
-
 # IngressRoute for the dashboard
 ingressRoute:
   dashboard:
@@ -25,37 +23,31 @@ ingressRoute:
     rule: "Host(`traefik.local`) && PathPrefix(`/dashboard`)"
     tls:
       certResolver: letsencrypt
-
 providers:
   kubernetesCRD:
     enabled: true
   kubernetesIngress:
     enabled: true
-
 additionalArguments:
   - "--certificatesresolvers.letsencrypt.acme.email=connect@3xmr.com"
   - "--certificatesresolvers.letsencrypt.acme.storage=/data/acme.json"
-  - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory"
+  - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"  # Start with staging
   - "--certificatesresolvers.letsencrypt.acme.dnschallenge=true"
   - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
   - "--certificatesresolvers.letsencrypt.acme.dnschallenge.delaybeforecheck=30"
   - "--serverstransport.insecureskipverify=true"
   - "--log.level=DEBUG"
-
 persistence:
   enabled: true
-  name: traefik
-  accessMode: ReadWriteOnce
-  size: 128Mi
-  storageClass: "local-storage"
+  existingClaim: "traefik-data"  # Use the existing PVC
   path: /data
-
 env:
   - name: CF_API_TOKEN
     valueFrom:
       secretKeyRef:
         name: cloudflare-api-token
         key: CF_API_TOKEN
+# Rest of your configuration remains the same
 
 # Additional resources for dynamic config
 additionalResources:

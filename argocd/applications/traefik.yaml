@@ -1,4 +1,5 @@
 # file: argocd/applications/traefik.yaml
+# file: argocd/applications/traefik.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -6,192 +7,16 @@ metadata:
   namespace: argocd
 spec:
   project: default
-
   source:
-    repoURL: "https://helm.traefik.io/traefik"
-    chart: "traefik"
-    targetRevision: "10.24.0"
-    helm:
-      # Optionally change the Helm release name if you want a totally fresh release
-      # releaseName: "traefik-lb"
-
-      values: |
-        #####################################################################
-        #  Traefik chart values (inline)                                    #
-        #####################################################################
-
-        # Service config
-        service:
-          type: LoadBalancer
-          externalIPs:
-            - 192.168.1.240
-          ports:
-            web:
-              port: 80
-              protocol: TCP
-              nodePort: 30080  # Fixed port
-            websecure:
-              port: 443
-              protocol: TCP
-              nodePort: 30443  # Fixed port
-
-        # Traefik Dashboard
-        dashboard:
-          enabled: true
-
-        # IngressRoute for the dashboard
-        ingressRoute:
-          dashboard:
-            enabled: true
-            rule: "Host(`traefik.local`) && PathPrefix(`/dashboard`)"
-            tls:
-              certResolver: letsencrypt
-
-        # Kubernetes providers
-        providers:
-          kubernetesCRD:
-            enabled: true
-          kubernetesIngress:
-            enabled: true
-
-        # Additional CLI arguments
-        additionalArguments:
-          - "--certificatesresolvers.letsencrypt.acme.email=connect@3xmr.com"
-          - "--certificatesresolvers.letsencrypt.acme.storage=/data/acme.json"
-          - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory"
-          - "--certificatesresolvers.letsencrypt.acme.dnschallenge=true"
-          - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
-          - "--certificatesresolvers.letsencrypt.acme.dnschallenge.delaybeforecheck=30"
-          - "--serverstransport.insecureskipverify=true"
-          - "--log.level=DEBUG"
-          - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"  # Use staging first to avoid rate limits
-
-
-        # Create/use ONE PVC named "traefik-certs" for ACME certs
-        persistence:
-          enabled: true
-          name: traefik-certs
-          accessMode: ReadWriteOnce
-          size: 128Mi
-          storageClass: "local-storage"
-          path: /data
-          annotations:
-            # Ensures Helm/Argo doesn't forcibly keep the PVC around on uninstall
-            "helm.sh/resource-policy": "delete"
-
-        # Cloudflare API token in environment
-        env:
-          - name: CF_API_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: cloudflare-api-token
-                key: CF_API_TOKEN
-
-        # Additional resources: example config map for dynamic config
-        additionalResources:
-          - apiVersion: v1
-            kind: ConfigMap
-            metadata:
-              name: traefik-config
-              namespace: traefik
-            data:
-              config.yml: |
-                http:
-                  routers:
-                    rpc:
-                      rule: "Host(`rpc.1xmr.com`)"
-                      entryPoints:
-                        - websecure
-                      service: rpc
-                      tls:
-                        certResolver: letsencrypt
-                    wallet:
-                      rule: "Host(`wallet.1xmr.com`)"
-                      entryPoints:
-                        - websecure
-                      service: wallet
-                      tls:
-                        certResolver: letsencrypt
-                    kibana:
-                      rule: "Host(`kibana.1xmr.com`)"
-                      entryPoints:
-                        - websecure
-                      service: kibana
-                      tls:
-                        certResolver: letsencrypt
-                    elasticsearch:
-                      rule: "Host(`elasticsearch.1xmr.com`)"
-                      entryPoints:
-                        - websecure
-                      service: elasticsearch
-                      tls:
-                        certResolver: letsencrypt
-                      middlewares:
-                        - es-auth
-                    logstash:
-                      rule: "Host(`logstash.1xmr.com`)"
-                      entryPoints:
-                        - websecure
-                      service: logstash
-                      tls:
-                        certResolver: letsencrypt
-                    traefik-dashboard:
-                      rule: "Host(`traefik.local`) && PathPrefix(`/dashboard`)"
-                      entryPoints:
-                        - websecure
-                      service: api@internal
-                      tls:
-                        certResolver: letsencrypt
-
-                  services:
-                    rpc:
-                      loadBalancer:
-                        servers:
-                          - url: "http://rpc-service:18082"
-                      passHostHeader: true
-                    wallet:
-                      loadBalancer:
-                        servers:
-                          - url: "http://wallet-service:18081"
-                      passHostHeader: true
-                    kibana:
-                      loadBalancer:
-                        servers:
-                          - url: "http://kibana:5601"
-                      passHostHeader: true
-                    elasticsearch:
-                      loadBalancer:
-                        servers:
-                          - url: "http://elasticsearch-master:9200"
-                      passHostHeader: true
-                    logstash:
-                      loadBalancer:
-                        servers:
-                          - url: "http://logstash:5044"
-                      passHostHeader: true
-
-                  middlewares:
-                    es-auth:
-                      basicAuth:
-                        users:
-                          - "admin:$apr1$H6uskkkW$IgXLP6ewTrSuBkTrqE8wj/"
-
-                logs:
-                  general:
-                    level: DEBUG
-
-        #####################################################################
-        #                End of your local values.yaml content              #
-        #####################################################################
-
+    repoURL: "git@github.com:wrightpt/elk-stack-kubernetes-simplified.git"
+    targetRevision: "main"
+    path: helm/traefik
   destination:
     server: "https://kubernetes.default.svc"
     namespace: "traefik"
-
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
-
+    - CreateNamespace=true
