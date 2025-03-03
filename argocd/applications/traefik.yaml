@@ -1,3 +1,4 @@
+# file: argocd/applications/traefik.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -5,16 +6,21 @@ metadata:
   namespace: argocd
 spec:
   project: default
+
   source:
     repoURL: "https://helm.traefik.io/traefik"
     chart: "traefik"
     targetRevision: "10.24.0"
     helm:
+      # Optionally change the Helm release name if you want a totally fresh release
+      # releaseName: "traefik-lb"
+
       values: |
         #####################################################################
-        #  Start of your local "helm/traefik/values.yaml" content           #
+        #  Traefik chart values (inline)                                    #
         #####################################################################
 
+        # Service config
         service:
           type: LoadBalancer
           externalIPs:
@@ -27,9 +33,11 @@ spec:
               port: 443
               protocol: TCP
 
+        # Traefik Dashboard
         dashboard:
           enabled: true
 
+        # IngressRoute for the dashboard
         ingressRoute:
           dashboard:
             enabled: true
@@ -37,12 +45,14 @@ spec:
             tls:
               certResolver: letsencrypt
 
+        # Kubernetes providers
         providers:
           kubernetesCRD:
             enabled: true
           kubernetesIngress:
             enabled: true
 
+        # Additional CLI arguments
         additionalArguments:
           - "--certificatesresolvers.letsencrypt.acme.email=connect@3xmr.com"
           - "--certificatesresolvers.letsencrypt.acme.storage=/data/acme.json"
@@ -53,15 +63,19 @@ spec:
           - "--serverstransport.insecureskipverify=true"
           - "--log.level=DEBUG"
 
-        # This tells the Traefik chart to create (or use) a PVC named “traefik-certs”
+        # Create/use ONE PVC named "traefik-certs" for ACME certs
         persistence:
           enabled: true
-          name: traefik-certs       # The PVC name it will generate or match
+          name: traefik-certs
           accessMode: ReadWriteOnce
           size: 128Mi
           storageClass: "local-storage"
-          path: /data               # Inside the container, Traefik sees this as /data
+          path: /data
+          annotations:
+            # Ensures Helm/Argo doesn't forcibly keep the PVC around on uninstall
+            "helm.sh/resource-policy": "delete"
 
+        # Cloudflare API token in environment
         env:
           - name: CF_API_TOKEN
             valueFrom:
@@ -69,6 +83,7 @@ spec:
                 name: cloudflare-api-token
                 key: CF_API_TOKEN
 
+        # Additional resources: example config map for dynamic config
         additionalResources:
           - apiVersion: v1
             kind: ConfigMap
