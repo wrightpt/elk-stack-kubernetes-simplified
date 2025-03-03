@@ -1,11 +1,12 @@
+#/elk-stack-repo/traefik-git.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: traefik
+  name: traefik-helm
   namespace: argocd
 spec:
   project: default
-  source:                      # <--- Must be indented under spec
+  source:
     repoURL: "https://helm.traefik.io/traefik"
     chart: "traefik"
     targetRevision: "10.24.0"
@@ -21,4 +22,3 @@ spec:
       selfHeal: true
     syncOptions:
     - CreateNamespace=true
-
