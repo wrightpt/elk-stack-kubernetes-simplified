@@ -7,7 +7,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://helm.traefik.io/traefik
+    repoURL: git@github.com:wrightpt/elk-stack-kubernetes-simplified.git
     chart: traefik
     targetRevision: 10.24.0
     helm:
