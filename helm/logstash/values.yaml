@@ -77,15 +77,19 @@ logstashPipeline:
           "service" => "nextjs-market"
           "log_type" => "application"
         }
-# REDACTED: Sensitive content removed
+        # Example of adding/modifying fields - Replace with your actual filter logic if needed
+        # Example:
+        # convert => {
+        #   "bytes" => "integer"
+        # }
       }
     }
 
     output {
       elasticsearch {
         hosts => ["${ES_HOSTS}"]
-        user => "${ES_USER}"
-# REDACTED: Sensitive content removed
+        # user => "${ES_USER}"  <- REMOVED authentication
+        # password => "${ES_PASSWORD}" <- REMOVED authentication
         index => "nextjs-market-${ENVIRONMENT}-%{+YYYY.MM.dd}"
         ssl_verification_mode => "none"
         timeout => 120
@@ -104,15 +108,15 @@ logstashPipeline:
 extraEnvs:
   - name: ES_HOSTS
     value: "https://elasticsearch-master:9200"
-  - name: ES_USER
-    valueFrom:
-# REDACTED: Sensitive content removed
-      name: logstash-credentials
-# REDACTED: Sensitive content removed
-# REDACTED: Sensitive content removed
-  valueFrom:
-# REDACTED: Sensitive content removed
-    name: logstash-credentials
-# REDACTED: Sensitive content removed
+  # - name: ES_USER  <- REMOVED authentication environment variable
+  #   valueFrom:     <- REMOVED authentication environment variable
+  #     secretKeyRef: <- REMOVED authentication environment variable
+  #       name: logstash-credentials <- REMOVED authentication environment variable
+  #       key: username          <- REMOVED authentication environment variable
+  # - name: ES_PASSWORD <- REMOVED authentication environment variable
+  #   valueFrom:     <- REMOVED authentication environment variable
+  #     secretKeyRef: <- REMOVED authentication environment variable
+  #       name: logstash-credentials <- REMOVED authentication environment variable
+  #       key: password          <- REMOVED authentication environment variable
   - name: ENVIRONMENT
     value: "production"
