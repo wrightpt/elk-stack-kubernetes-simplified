@@ -18,7 +18,7 @@ persistence:
 
 # Network settings
 service:
-  type: ClusterIP
+  type: LoadBalancer # Changed to LoadBalancer
 
 # Security settings
 securityContext:

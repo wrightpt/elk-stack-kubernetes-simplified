@@ -1,4 +1,4 @@
-# helm/logstash-values.yaml
+# helm/logstash/values.yaml
 image:
   repository: "logstash"
   tag: "7.17.3"
@@ -20,7 +20,7 @@ persistence:
 
 # Network settings
 service:
-  type: ClusterIP
+  type: LoadBalancer # Changed to LoadBalancer
   ports:
     - name: http
       port: 5044
@@ -59,7 +59,7 @@ logstashPipeline:
         host => "0.0.0.0"
         port => 5044
         codec => json
-        
+
         response_headers => {
           "Content-Type" => "application/json"
           "Access-Control-Allow-Origin" => "*"
@@ -77,7 +77,7 @@ logstashPipeline:
           "service" => "nextjs-market"
           "log_type" => "application"
         }
-        remove_field => ["headers", "password"]
+# REDACTED: Sensitive content removed
       }
     }
 
@@ -85,7 +85,7 @@ logstashPipeline:
       elasticsearch {
         hosts => ["${ES_HOSTS}"]
         user => "${ES_USER}"
-        password => "${ES_PASSWORD}"
+# REDACTED: Sensitive content removed
         index => "nextjs-market-${ENVIRONMENT}-%{+YYYY.MM.dd}"
         ssl_verification_mode => "none"
         timeout => 120
@@ -93,7 +93,7 @@ logstashPipeline:
         retry_max_interval => 30
         retry_initial_interval => 2
       }
-      
+
       file {
         path => "/var/log/logstash/nextjs-market-debug.log"
         codec => json_lines
@@ -107,13 +107,13 @@ extraEnvs:
     value: "https://elasticsearch-master:9200"
   - name: ES_USER
     valueFrom:
-      secretKeyRef:
-        name: logstash-credentials
-        key: username
-  - name: ES_PASSWORD
-    valueFrom:
-      secretKeyRef:
-        name: logstash-credentials
-        key: password
+# REDACTED: Sensitive content removed
+      name: logstash-credentials
+# REDACTED: Sensitive content removed
+# REDACTED: Sensitive content removed
+  valueFrom:
+# REDACTED: Sensitive content removed
+      name: logstash-credentials
+# REDACTED: Sensitive content removed
   - name: ENVIRONMENT
     value: "production"

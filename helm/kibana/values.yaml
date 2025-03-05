@@ -1,4 +1,4 @@
-# helm/kibana-values.yaml
+# helm/kibana/values.yaml
 image:
   repository: "kibana"
   tag: "7.17.3"
@@ -22,7 +22,7 @@ persistence:
 
 # Network settings
 service:
-  type: ClusterIP
+  type: LoadBalancer # Changed to LoadBalancer
   port: 5601
 
 # Security settings
@@ -37,9 +37,9 @@ kibanaConfig:
     server.host: "0.0.0.0"
     server.publicBaseUrl: "https://kibana.1xmr.com"
     elasticsearch.username: "kibana_admin"
-    elasticsearch.password: "${KIBANA_ES_PASSWORD}"
+    # REDACTED: Sensitive content removed
     elasticsearch.ssl.verificationMode: none
-    xpack.encryptedSavedObjects.encryptionKey: "${KIBANA_ENCRYPTION_KEY}"
+    # REDACTED: Sensitive content removed
     logging:
       appenders:
         file:
@@ -53,15 +53,15 @@ kibanaConfig:
           - file
     pid.file: /run/kibana/kibana.pid
 
-# Environment variables for secrets
+# REDACTED: Sensitive content removed
 extraEnvs:
-  - name: KIBANA_ES_PASSWORD
-    valueFrom:
-      secretKeyRef:
-        name: kibana-credentials
-        key: password
-  - name: KIBANA_ENCRYPTION_KEY
-    valueFrom:
-      secretKeyRef:
-        name: kibana-credentials
-        key: encryptionKey
+# REDACTED: Sensitive content removed
+  valueFrom:
+# REDACTED: Sensitive content removed
+    name: kibana-credentials
+# REDACTED: Sensitive content removed
+# REDACTED: Sensitive content removed
+  valueFrom:
+# REDACTED: Sensitive content removed
+    name: kibana-credentials
+# REDACTED: Sensitive content removed
