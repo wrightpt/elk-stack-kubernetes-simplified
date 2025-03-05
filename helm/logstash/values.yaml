@@ -94,12 +94,11 @@ logstashPipeline:
         retry_initial_interval => 2
       }
 
-      file {
-        path => "/var/log/logstash/nextjs-market-debug.log"
-        codec => json_lines
-        flush_interval => 60
-      }
-    }
+      file: # Corrected indentation here - file output is sibling to elasticsearch output
+        path: "/var/log/logstash/nextjs-market-debug.log" # Corrected indentation
+        codec: json_lines # Corrected indentation
+        flush_interval: 60 # Corrected indentation
+    } # end output
 
 # Environment variables
 extraEnvs:
@@ -113,7 +112,7 @@ extraEnvs:
 # REDACTED: Sensitive content removed
   valueFrom:
 # REDACTED: Sensitive content removed
-      name: logstash-credentials
+    name: logstash-credentials
 # REDACTED: Sensitive content removed
   - name: ENVIRONMENT
     value: "production"
