@@ -6,9 +6,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://helm.elastic.co
-    chart: elasticsearch
-    targetRevision: 7.17.3
+    repoURL: git@github.com:wrightpt/elk-stack-kubernetes-simplified.git
+    targetRevision: main
+    path: helm/elasticsearch
     helm:
       valueFiles:
         - values.yaml

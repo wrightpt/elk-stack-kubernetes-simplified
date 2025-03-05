@@ -22,198 +22,17 @@ argocd/
 │   ├── hooks/
 │   ├── info/
 │   ├── objects/
-│   │   ├── 7a/
 │   │   ├── e1/
-│   │   ├── ab/
-│   │   ├── 25/
-│   │   ├── 64/
-│   │   ├── 3c/
-│   │   ├── aa/
-│   │   ├── 32/
-│   │   ├── 8b/
 │   │   ├── pack/
-│   │   ├── b3/
-│   │   ├── ff/
-│   │   ├── 47/
-│   │   ├── ca/
-│   │   ├── db/
-│   │   ├── fe/
-│   │   ├── 88/
-│   │   ├── 79/
-│   │   ├── 20/
-│   │   ├── 17/
-│   │   ├── 8d/
-│   │   ├── 05/
-│   │   ├── 49/
 │   │   ├── 0a/
-│   │   ├── 22/
-│   │   ├── e2/
-│   │   ├── 0e/
-│   │   ├── 24/
-│   │   ├── 6e/
-│   │   ├── 8c/
-│   │   ├── 2c/
-│   │   ├── ef/
-│   │   ├── 97/
-│   │   ├── 53/
-│   │   ├── 3b/
-│   │   ├── d7/
-│   │   ├── 03/
-│   │   ├── 82/
-│   │   ├── b8/
-│   │   ├── 11/
-│   │   ├── d6/
-│   │   ├── f8/
-│   │   ├── 42/
-│   │   ├── 6c/
-│   │   ├── 10/
-│   │   ├── 39/
-│   │   ├── 38/
-│   │   ├── 14/
-│   │   ├── 84/
-│   │   ├── a7/
-│   │   ├── 81/
-│   │   ├── 75/
-│   │   ├── 96/
-│   │   ├── cd/
-│   │   ├── 58/
-│   │   ├── 91/
-│   │   ├── 9c/
-│   │   ├── 60/
-│   │   ├── 34/
-│   │   ├── f9/
-│   │   ├── ac/
-│   │   ├── 9f/
-│   │   ├── b9/
-│   │   ├── 93/
-│   │   ├── 36/
-│   │   ├── 0c/
-│   │   ├── a1/
-│   │   ├── 3a/
-│   │   ├── e6/
-│   │   ├── 94/
-│   │   ├── 55/
-│   │   ├── 16/
-│   │   ├── 51/
-│   │   ├── 78/
-│   │   ├── d2/
-│   │   ├── 5e/
-│   │   ├── 92/
-│   │   ├── b2/
-│   │   ├── e4/
-│   │   ├── 15/
-│   │   ├── 09/
-│   │   ├── 9a/
-│   │   ├── d4/
-│   │   ├── c7/
-│   │   ├── 62/
-│   │   ├── 66/
-│   │   ├── a3/
-│   │   ├── 5a/
-│   │   ├── 90/
-│   │   ├── d5/
-│   │   ├── b0/
-│   │   ├── f6/
-│   │   ├── da/
-│   │   ├── 01/
-│   │   ├── fd/
-│   │   ├── 07/
-│   │   ├── 41/
-│   │   ├── 3f/
-│   │   ├── bf/
-│   │   ├── 68/
-│   │   ├── 27/
-│   │   ├── c4/
-│   │   ├── ed/
-│   │   ├── 2a/
-│   │   ├── e5/
-│   │   ├── 3d/
-│   │   ├── 35/
-│   │   ├── ae/
-│   │   ├── 4b/
-│   │   ├── 98/
+│   │   ├── 28/
+│   │   ├── 45/
+│   │   ├── cc/
 │   │   ├── bc/
-│   │   ├── a2/
-│   │   ├── 02/
-│   │   ├── 8e/
-│   │   ├── 5f/
-│   │   ├── e0/
-│   │   ├── 7c/
-│   │   ├── c3/
-│   │   ├── 50/
-│   │   ├── f1/
-│   │   ├── 9e/
-│   │   ├── 13/
-│   │   ├── bb/
-│   │   ├── c8/
-│   │   ├── ba/
-│   │   ├── 08/
-│   │   ├── 2b/
-│   │   ├── e3/
-│   │   ├── 4a/
-│   │   ├── 30/
-│   │   ├── d0/
-│   │   ├── 87/
-│   │   ├── de/
-│   │   ├── af/
-│   │   ├── be/
-│   │   ├── 2e/
-│   │   ├── 80/
-│   │   ├── f7/
-│   │   ├── 19/
-│   │   ├── 37/
-│   │   ├── ec/
-│   │   ├── 12/
-│   │   ├── e8/
-│   │   ├── 71/
 │   │   ├── info/
-│   │   ├── ad/
-│   │   ├── 8f/
-│   │   ├── 04/
-│   │   ├── 40/
-│   │   ├── f3/
-│   │   ├── 46/
-│   │   ├── 7b/
-│   │   ├── 1c/
-│   │   ├── 86/
-│   │   ├── 6d/
-│   │   ├── 1e/
-│   │   ├── f2/
-│   │   ├── 31/
-│   │   ├── 5b/
-│   │   ├── c9/
-│   │   ├── 7f/
-│   │   ├── f0/
-│   │   ├── c0/
-│   │   ├── 65/
-│   │   ├── 21/
-│   │   ├── 99/
-│   │   ├── 69/
-│   │   ├── 5d/
-│   │   ├── 54/
-│   │   ├── cb/
-│   │   ├── e9/
-│   │   ├── 63/
-│   │   ├── 67/
-│   │   ├── eb/
-│   │   ├── 76/
-│   │   ├── 56/
-│   │   ├── a0/
-│   │   ├── 06/
-│   │   ├── 9d/
-│   │   ├── ea/
-│   │   ├── 29/
-│   │   ├── c2/
-│   │   ├── dd/
-│   │   ├── ce/
-│   │   ├── 0b/
-│   │   ├── b6/
-│   │   ├── b7/
-│   │   ├── 74/
-│   │   ├── 3e/
-│   │   ├── cf/
-│   │   ├── 6f/
-│   │   ├── 4f/
+│   │   ├── 72/
+│   │   ├── fc/
+│   │   ├── a9/
 │   ├── branches/
 │   ├── refs/
 │   │   ├── heads/
@@ -732,7 +551,7 @@ persistence:
 
 # Network settings
 service:
-  type: ClusterIP
+  type: LoadBalancer # Changed to LoadBalancer
 
 # Security settings
 securityContext:
@@ -763,7 +582,7 @@ dependencies:
 
 
 === File: helm/logstash/values.yaml ===
-# helm/logstash-values.yaml
+# helm/logstash/values.yaml
 image:
   repository: "logstash"
   tag: "7.17.3"
@@ -785,7 +604,7 @@ persistence:
 
 # Network settings
 service:
-  type: ClusterIP
+  type: LoadBalancer # Changed to LoadBalancer
   ports:
     - name: http
       port: 5044
@@ -824,7 +643,7 @@ logstashPipeline:
         host => "0.0.0.0"
         port => 5044
         codec => json
-        
+
         response_headers => {
           "Content-Type" => "application/json"
           "Access-Control-Allow-Origin" => "*"
@@ -858,7 +677,7 @@ logstashPipeline:
         retry_max_interval => 30
         retry_initial_interval => 2
       }
-      
+
       file {
         path => "/var/log/logstash/nextjs-market-debug.log"
         codec => json_lines
@@ -873,12 +692,12 @@ extraEnvs:
   - name: ES_USER
     valueFrom:
 # REDACTED: Sensitive content removed
-        name: logstash-credentials
+      name: logstash-credentials
 # REDACTED: Sensitive content removed
 # REDACTED: Sensitive content removed
-    valueFrom:
+  valueFrom:
 # REDACTED: Sensitive content removed
-        name: logstash-credentials
+      name: logstash-credentials
 # REDACTED: Sensitive content removed
   - name: ENVIRONMENT
     value: "production"
@@ -898,7 +717,7 @@ dependencies:
 
 
 === File: helm/kibana/values.yaml ===
-# helm/kibana-values.yaml
+# helm/kibana/values.yaml
 image:
   repository: "kibana"
   tag: "7.17.3"
@@ -922,7 +741,7 @@ persistence:
 
 # Network settings
 service:
-  type: ClusterIP
+  type: LoadBalancer # Changed to LoadBalancer
   port: 5601
 
 # Security settings
@@ -937,9 +756,9 @@ kibanaConfig:
     server.host: "0.0.0.0"
     server.publicBaseUrl: "https://kibana.1xmr.com"
     elasticsearch.username: "kibana_admin"
-# REDACTED: Sensitive content removed
+    # REDACTED: Sensitive content removed
     elasticsearch.ssl.verificationMode: none
-# REDACTED: Sensitive content removed
+    # REDACTED: Sensitive content removed
     logging:
       appenders:
         file:
@@ -956,14 +775,14 @@ kibanaConfig:
 # REDACTED: Sensitive content removed
 extraEnvs:
 # REDACTED: Sensitive content removed
-    valueFrom:
+  valueFrom:
 # REDACTED: Sensitive content removed
-        name: kibana-credentials
+    name: kibana-credentials
 # REDACTED: Sensitive content removed
 # REDACTED: Sensitive content removed
-    valueFrom:
+  valueFrom:
 # REDACTED: Sensitive content removed
-        name: kibana-credentials
+    name: kibana-credentials
 # REDACTED: Sensitive content removed
 
 
