@@ -22,17 +22,35 @@ argocd/
 │   ├── hooks/
 │   ├── info/
 │   ├── objects/
+│   │   ├── 52/
 │   │   ├── e1/
+│   │   ├── 25/
 │   │   ├── pack/
+│   │   ├── 8d/
 │   │   ├── 0a/
 │   │   ├── 28/
+│   │   ├── 97/
+│   │   ├── b8/
+│   │   ├── 91/
 │   │   ├── 45/
+│   │   ├── 90/
+│   │   ├── 01/
+│   │   ├── bf/
 │   │   ├── cc/
+│   │   ├── a6/
+│   │   ├── e5/
+│   │   ├── 98/
 │   │   ├── bc/
+│   │   ├── 87/
+│   │   ├── a4/
+│   │   ├── 12/
 │   │   ├── info/
 │   │   ├── 72/
+│   │   ├── 5d/
 │   │   ├── fc/
 │   │   ├── a9/
+│   │   ├── f4/
+│   │   ├── 6f/
 │   ├── branches/
 │   ├── refs/
 │   │   ├── heads/
@@ -200,9 +218,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://helm.elastic.co
-    chart: logstash
-    targetRevision: 7.17.3
+    repoURL: git@github.com:wrightpt/elk-stack-kubernetes-simplified.git
+    targetRevision: main
+    path: helm/logstash
     helm:
       valueFiles:
         - values.yaml
@@ -252,9 +270,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://helm.elastic.co
-    chart: elasticsearch
-    targetRevision: 7.17.3
+    repoURL: git@github.com:wrightpt/elk-stack-kubernetes-simplified.git
+    targetRevision: main
+    path: helm/elasticsearch
     helm:
       valueFiles:
         - values.yaml
@@ -278,9 +296,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://helm.elastic.co
-    chart: kibana
-    targetRevision: 7.17.3
+    repoURL: git@github.com:wrightpt/elk-stack-kubernetes-simplified.git
+    targetRevision: main
+    path: helm/kibana
     helm:
       valueFiles:
         - values.yaml
@@ -661,14 +679,18 @@ logstashPipeline:
           "service" => "nextjs-market"
           "log_type" => "application"
         }
-# REDACTED: Sensitive content removed
+        # Example of adding/modifying fields - Replace with your actual filter logic if needed
+        # Example:
+        # convert => {
+        #   "bytes" => "integer"
+        # }
       }
     }
 
     output {
       elasticsearch {
         hosts => ["${ES_HOSTS}"]
-        user => "${ES_USER}"
+        # user => "${ES_USER}"  <- REMOVED authentication
 # REDACTED: Sensitive content removed
         index => "nextjs-market-${ENVIRONMENT}-%{+YYYY.MM.dd}"
         ssl_verification_mode => "none"
@@ -678,26 +700,25 @@ logstashPipeline:
         retry_initial_interval => 2
       }
 
-      file {
-        path => "/var/log/logstash/nextjs-market-debug.log"
-        codec => json_lines
-        flush_interval => 60
-      }
-    }
+      file: # Corrected indentation here - file output is sibling to elasticsearch output
+        path: "/var/log/logstash/nextjs-market-debug.log" # Corrected indentation
+        codec: json_lines # Corrected indentation
+        flush_interval: 60 # Corrected indentation
+    } # end output
 
 # Environment variables
 extraEnvs:
   - name: ES_HOSTS
     value: "https://elasticsearch-master:9200"
-  - name: ES_USER
-    valueFrom:
+  # - name: ES_USER  <- REMOVED authentication environment variable
+  #   valueFrom:     <- REMOVED authentication environment variable
 # REDACTED: Sensitive content removed
-      name: logstash-credentials
+  #       name: logstash-credentials <- REMOVED authentication environment variable
 # REDACTED: Sensitive content removed
 # REDACTED: Sensitive content removed
-  valueFrom:
+  #   valueFrom:     <- REMOVED authentication environment variable
 # REDACTED: Sensitive content removed
-      name: logstash-credentials
+  #       name: logstash-credentials <- REMOVED authentication environment variable
 # REDACTED: Sensitive content removed
   - name: ENVIRONMENT
     value: "production"

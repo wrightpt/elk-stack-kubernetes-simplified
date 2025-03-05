@@ -1,35 +1,44 @@
-# helm/elasticsearch-values.yaml
-replicas: 1  # Adjust based on your home server capacity
+# helm/elasticsearch/values.yaml
+elasticsearch:  # Parent key for the subchart
+  replicas: 1  # Adjust based on your home server capacity
+  
+  # Resource requests and limits
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+  
+  # Persistence configuration
+  persistence:
+    enabled: true
+    storageClass: "local-storage"
+    size: "30Gi"
+  
+  # Network settings
+  service:
+    type: LoadBalancer  # Changed to LoadBalancer
+  
+  # Security settings
+  securityContext:
+    enabled: true
+    runAsUser: 1000
+    fsGroup: 1000
+  
+  # Config for ES
+  esConfig:
+    elasticsearch.yml: |
+      cluster.name: home-cluster
+      discovery.type: single-node
+      xpack.security.enabled: true
+      xpack.security.transport.ssl.enabled: true
 
-# Resource requests and limits
-resources:
-  requests:
-    cpu: "500m"
-    memory: "1Gi"
-  limits:
-    cpu: "1"
-    memory: "2Gi"
+# Global settings that might be needed
+# Uncomment if you need specific image settings
+#imageTag: "7.17.3"
+#imagePullPolicy: "IfNotPresent"
 
-# Persistence configuration
-persistence:
-  enabled: true
-  storageClass: "local-storage"
-  size: "30Gi"
-
-# Network settings
-service:
-  type: LoadBalancer # Changed to LoadBalancer
-
-# Security settings
-securityContext:
-  enabled: true
-  runAsUser: 1000
-  fsGroup: 1000
-
-# Config for ES
-esConfig:
-  elasticsearch.yml: |
-    cluster.name: home-cluster
-    discovery.type: single-node
-    xpack.security.enabled: true
-    xpack.security.transport.ssl.enabled: true
+# You can add global settings if needed
+antiAffinity: "soft"  # Common Elasticsearch setting

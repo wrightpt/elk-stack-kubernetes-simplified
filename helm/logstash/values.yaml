@@ -1,122 +1,123 @@
 # helm/logstash/values.yaml
-image:
-  repository: "logstash"
-  tag: "7.17.3"
-
-# Resource requests and limits
-resources:
-  requests:
-    cpu: "500m"
-    memory: "2Gi"
-  limits:
-    cpu: "2"
-    memory: "4Gi"
-
-# Persistence configuration
-persistence:
-  enabled: true
-  storageClass: "local-storage"
-  size: "10Gi"
-
-# Network settings
-service:
-  type: LoadBalancer # Changed to LoadBalancer
-  ports:
-    - name: http
-      port: 5044
-      protocol: TCP
-
-# Security settings
-securityContext:
-  runAsUser: 1000
-  fsGroup: 1000
-
-# Logstash configuration
-logstashConfig:
-  logstash.yml: |
-    path.data: /usr/share/logstash/data
-    path.logs: /var/log/logstash
-    node.name: nextjs-market-logstash
-    pipeline.workers: 8
-    pipeline.batch.size: 1000
-    pipeline.batch.delay: 50
-    queue.type: persisted
-    queue.max_bytes: 3gb
-    log.level: debug
-
-  pipelines.yml: |
-    - pipeline.id: main
-      path.config: "/usr/share/logstash/pipeline/*.conf"
-
-# JVM options
-logstashJavaOpts: "-Xms2g -Xmx2g"
-
-# Pipeline configuration
-logstashPipeline:
-  nextjs-market.conf: |
-    input {
-      http {
-        host => "0.0.0.0"
-        port => 5044
-        codec => json
-
-        response_headers => {
-          "Content-Type" => "application/json"
-          "Access-Control-Allow-Origin" => "*"
-          "Access-Control-Allow-Methods" => "POST, OPTIONS"
-          "Access-Control-Allow-Headers" => "Content-Type"
+logstash:
+  image:
+    repository: "logstash"
+    tag: "7.17.3"
+  
+  # Resource requests and limits
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "2Gi"
+    limits:
+      cpu: "2"
+      memory: "4Gi"
+  
+  # Persistence configuration
+  persistence:
+    enabled: true
+    storageClass: "local-storage"
+    size: "10Gi"
+  
+  # Network settings
+  service:
+    type: LoadBalancer # Changed to LoadBalancer
+    ports:
+      - name: http
+        port: 5044
+        protocol: TCP
+  
+  # Security settings
+  securityContext:
+    runAsUser: 1000
+    fsGroup: 1000
+  
+  # Logstash configuration
+  logstashConfig:
+    logstash.yml: |
+      path.data: /usr/share/logstash/data
+      path.logs: /var/log/logstash
+      node.name: nextjs-market-logstash
+      pipeline.workers: 8
+      pipeline.batch.size: 1000
+      pipeline.batch.delay: 50
+      queue.type: persisted
+      queue.max_bytes: 3gb
+      log.level: debug
+      
+    pipelines.yml: |
+      - pipeline.id: main
+        path.config: "/usr/share/logstash/pipeline/*.conf"
+  
+  # JVM options
+  logstashJavaOpts: "-Xms2g -Xmx2g"
+  
+  # Pipeline configuration
+  logstashPipeline:
+    nextjs-market.conf: |
+      input {
+        http {
+          host => "0.0.0.0"
+          port => 5044
+          codec => json
+          response_headers => {
+            "Content-Type" => "application/json"
+            "Access-Control-Allow-Origin" => "*"
+            "Access-Control-Allow-Methods" => "POST, OPTIONS"
+            "Access-Control-Allow-Headers" => "Content-Type"
+          }
         }
       }
-    }
-
-    filter {
-      mutate {
-        add_field => {
-          "received_at" => "%{@timestamp}"
-          "environment" => "${ENVIRONMENT}"
-          "service" => "nextjs-market"
-          "log_type" => "application"
+      
+      filter {
+        mutate {
+          add_field => {
+            "received_at" => "%{@timestamp}"
+            "environment" => "${ENVIRONMENT}"
+            "service" => "nextjs-market"
+            "log_type" => "application"
+          }
+          # Example of adding/modifying fields - Replace with your actual filter logic if needed
+          # Example:
+          # convert => {
+          #   "bytes" => "integer"
+          # }
         }
-        # Example of adding/modifying fields - Replace with your actual filter logic if needed
-        # Example:
-        # convert => {
-        #   "bytes" => "integer"
-        # }
       }
-    }
-
-    output {
-      elasticsearch {
-        hosts => ["${ES_HOSTS}"]
-        # user => "${ES_USER}"  <- REMOVED authentication
-        # password => "${ES_PASSWORD}" <- REMOVED authentication
-        index => "nextjs-market-${ENVIRONMENT}-%{+YYYY.MM.dd}"
-        ssl_verification_mode => "none"
-        timeout => 120
-        retry_on_conflict => 5
-        retry_max_interval => 30
-        retry_initial_interval => 2
+      
+      output {
+        elasticsearch {
+          hosts => ["${ES_HOSTS}"]
+          # user => "${ES_USER}"  <- REMOVED authentication
+          # password => "${ES_PASSWORD}" <- REMOVED authentication
+          index => "nextjs-market-${ENVIRONMENT}-%{+YYYY.MM.dd}"
+          ssl_verification_mode => "none"
+          timeout => 120
+          retry_on_conflict => 5
+          retry_max_interval => 30
+          retry_initial_interval => 2
+        }
+        
+        file {
+          path => "/var/log/logstash/nextjs-market-debug.log"
+          codec => json_lines
+          flush_interval => 60
+        }
       }
-
-      file: # Corrected indentation here - file output is sibling to elasticsearch output
-        path: "/var/log/logstash/nextjs-market-debug.log" # Corrected indentation
-        codec: json_lines # Corrected indentation
-        flush_interval: 60 # Corrected indentation
-    } # end output
-
-# Environment variables
-extraEnvs:
-  - name: ES_HOSTS
-    value: "https://elasticsearch-master:9200"
-  # - name: ES_USER  <- REMOVED authentication environment variable
-  #   valueFrom:     <- REMOVED authentication environment variable
-  #     secretKeyRef: <- REMOVED authentication environment variable
-  #       name: logstash-credentials <- REMOVED authentication environment variable
-  #       key: username          <- REMOVED authentication environment variable
-  # - name: ES_PASSWORD <- REMOVED authentication environment variable
-  #   valueFrom:     <- REMOVED authentication environment variable
-  #     secretKeyRef: <- REMOVED authentication environment variable
-  #       name: logstash-credentials <- REMOVED authentication environment variable
-  #       key: password          <- REMOVED authentication environment variable
-  - name: ENVIRONMENT
-    value: "production"
+  
+  # Environment variables
+  extraEnvs:
+    - name: ES_HOSTS
+      value: "https://elasticsearch-master:9200"
+    # - name: ES_USER  <- REMOVED authentication environment variable
+    #   valueFrom:     <- REMOVED authentication environment variable
+    #     secretKeyRef: <- REMOVED authentication environment variable
+    #       name: logstash-credentials <- REMOVED authentication environment variable
+    #       key: username          <- REMOVED authentication environment variable
+    # - name: ES_PASSWORD <- REMOVED authentication environment variable
+    #   valueFrom:     <- REMOVED authentication environment variable
+    #     secretKeyRef: <- REMOVED authentication environment variable
+    #       name: logstash-credentials <- REMOVED authentication environment variable
+    #       key: password          <- REMOVED authentication environment variable
+    - name: ENVIRONMENT
+      value: "production"

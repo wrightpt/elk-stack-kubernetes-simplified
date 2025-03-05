@@ -1,67 +1,68 @@
 # helm/kibana/values.yaml
-image:
-  repository: "kibana"
-  tag: "7.17.3"
-
-elasticsearchHosts: "http://elasticsearch-master:9200"
-
-# Resource requests and limits
-resources:
-  requests:
-    cpu: "500m"
-    memory: "1Gi"
-  limits:
-    cpu: "1"
-    memory: "2Gi"
-
-# Persistence configuration
-persistence:
-  enabled: true
-  storageClass: "local-storage"
-  size: "5Gi"
-
-# Network settings
-service:
-  type: LoadBalancer # Changed to LoadBalancer
-  port: 5601
-
-# Security settings
-securityContext:
-  enabled: true
-  runAsUser: 1000
-  fsGroup: 1000
-
-# Kibana configuration
-kibanaConfig:
-  kibana.yml: |
-    server.host: "0.0.0.0"
-    server.publicBaseUrl: "https://kibana.1xmr.com"
-    elasticsearch.username: "kibana_admin"
-    # REDACTED: Sensitive content removed
-    elasticsearch.ssl.verificationMode: none
-    # REDACTED: Sensitive content removed
-    logging:
-      appenders:
-        file:
-          type: file
-          fileName: /var/log/kibana/kibana.log
-          layout:
-            type: json
-      root:
+kibana:
+  image:
+    repository: "kibana"
+    tag: "7.17.3"
+  
+  elasticsearchHosts: "http://elasticsearch-master:9200"
+  
+  # Resource requests and limits
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+  
+  # Persistence configuration
+  persistence:
+    enabled: true
+    storageClass: "local-storage"
+    size: "5Gi"
+  
+  # Network settings
+  service:
+    type: LoadBalancer # Changed to LoadBalancer
+    port: 5601
+  
+  # Security settings
+  securityContext:
+    enabled: true
+    runAsUser: 1000
+    fsGroup: 1000
+  
+  # Kibana configuration
+  kibanaConfig:
+    kibana.yml: |
+      server.host: "0.0.0.0"
+      server.publicBaseUrl: "https://kibana.1xmr.com"
+      elasticsearch.username: "kibana_admin"
+      # REDACTED: Sensitive content removed
+      elasticsearch.ssl.verificationMode: none
+      # REDACTED: Sensitive content removed
+      logging:
         appenders:
-          - default
-          - file
-    pid.file: /run/kibana/kibana.pid
-
-# REDACTED: Sensitive content removed
-extraEnvs:
-# REDACTED: Sensitive content removed
-  valueFrom:
-# REDACTED: Sensitive content removed
-    name: kibana-credentials
-# REDACTED: Sensitive content removed
-# REDACTED: Sensitive content removed
-  valueFrom:
-# REDACTED: Sensitive content removed
-    name: kibana-credentials
-# REDACTED: Sensitive content removed
+          file:
+            type: file
+            fileName: /var/log/kibana/kibana.log
+            layout:
+              type: json
+        root:
+          appenders:
+            - default
+            - file
+      pid.file: /run/kibana/kibana.pid
+  
+  # REDACTED: Sensitive content removed
+  extraEnvs:
+  # REDACTED: Sensitive content removed
+    valueFrom:
+  # REDACTED: Sensitive content removed
+      name: kibana-credentials
+  # REDACTED: Sensitive content removed
+  # REDACTED: Sensitive content removed
+    valueFrom:
+  # REDACTED: Sensitive content removed
+      name: kibana-credentials
+  # REDACTED: Sensitive content removed
